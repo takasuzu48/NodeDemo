@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Webhook Viewer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c0f;
+    --panel: #111418;
+    --border: #1e2530;
+    --accent: #00e5a0;
+    --del: #ff3b5c;
+    --text: #e2e8f0;
+    --muted: #4a5568;
+    --code: #a8b8cc;
+    --post: #0066ff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; min-height: 100vh; }
+
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 32px; border-bottom: 1px solid var(--border);
+    background: var(--panel);
+  }
+  .logo { font-size: 18px; font-weight: 800; }
+  .logo span { color: var(--accent); }
+  .nav-link {
+    font-size: 13px; color: var(--muted); text-decoration: none;
+    padding: 6px 14px; border: 1px solid var(--border); border-radius: 6px;
+    transition: all 0.15s;
+  }
+  .nav-link:hover { color: var(--text); border-color: var(--accent); }
+
+  .hero {
+    background: var(--panel); border-bottom: 1px solid var(--border);
+    padding: 28px 32px;
+  }
+  .hero-top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+  .hero-title { font-size: 22px; font-weight: 800; }
+  .hero-title span { color: var(--accent); }
+
+  .endpoint-box {
+    display: flex; align-items: center; gap: 10px; margin-top: 16px;
+    background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px 16px; flex-wrap: wrap;
+  }
+  .badge-post {
+    background: rgba(0,102,255,0.2); color: var(--post);
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700;
+    padding: 3px 8px; border-radius: 4px;
+  }
+  .endpoint-url {
+    font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--accent);
+    flex: 1; word-break: break-all;
+  }
+  .copy-btn {
+    background: rgba(0,229,160,0.1); border: 1px solid rgba(0,229,160,0.3);
+    color: var(--accent); padding: 5px 12px; border-radius: 6px; cursor: pointer;
+    font-size: 12px; font-family: 'Syne', sans-serif; font-weight: 600;
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .copy-btn:hover { background: rgba(0,229,160,0.2); }
+
+  .stats-bar {
+    display: flex; gap: 24px; margin-top: 16px; flex-wrap: wrap;
+  }
+  .stat { display: flex; flex-direction: column; }
+  .stat-val { font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 700; color: var(--accent); }
+  .stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 32px; flex-wrap: wrap; gap: 12px;
+  }
+  .toolbar-left { display: flex; align-items: center; gap: 10px; }
+  .section-label { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+
+  .btn {
+    padding: 9px 18px; border: none; border-radius: 8px; cursor: pointer;
+    font-family: 'Syne', sans-serif; font-weight: 600; font-size: 13px;
+    transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-refresh { background: rgba(0,229,160,0.1); color: var(--accent); border: 1px solid rgba(0,229,160,0.25); }
+  .btn-refresh:hover { background: rgba(0,229,160,0.2); }
+  .btn-clear { background: rgba(255,59,92,0.1); color: var(--del); border: 1px solid rgba(255,59,92,0.25); }
+  .btn-clear:hover { background: rgba(255,59,92,0.2); }
+
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .content { padding: 0 32px 32px; }
+
+  /* Log cards */
+  .log-card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    margin-bottom: 12px; overflow: hidden;
+    animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .log-card-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px; border-bottom: 1px solid var(--border);
+    cursor: pointer; user-select: none;
+  }
+  .log-card-header:hover { background: rgba(255,255,255,0.02); }
+  .log-index {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    background: rgba(0,229,160,0.1); color: var(--accent);
+    padding: 2px 8px; border-radius: 4px; font-weight: 700;
+  }
+  .log-time {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted);
+  }
+  .log-preview {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--code);
+    flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  }
+  .toggle-icon { color: var(--muted); font-size: 12px; transition: transform 0.2s; }
+  .toggle-icon.open { transform: rotate(180deg); }
+
+  .log-card-body {
+    display: none; padding: 16px;
+  }
+  .log-card-body.open { display: block; }
+
+  .json-block {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    line-height: 1.7; white-space: pre-wrap; word-break: break-all; color: var(--code);
+    max-height: 400px; overflow-y: auto;
+  }
+  .json-block .key { color: #7dd3fc; }
+  .json-block .string { color: #86efac; }
+  .json-block .number { color: #fca5a5; }
+  .json-block .bool { color: #f0abfc; }
+  .json-block .null { color: var(--muted); }
+
+  .empty { color: var(--muted); font-size: 14px; text-align: center; padding: 60px; border: 1px dashed var(--border); border-radius: 12px; }
+
+  /* Modal */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7); z-index: 100;
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 14px; padding: 28px; max-width: 400px; width: 90%;
+  }
+  .modal h3 { font-size: 18px; margin-bottom: 10px; }
+  .modal p { font-size: 14px; color: var(--muted); margin-bottom: 24px; line-height: 1.6; }
+  .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
+  .btn-cancel { background: rgba(255,255,255,0.05); color: var(--text); border: 1px solid var(--border); }
+  .btn-cancel:hover { background: rgba(255,255,255,0.1); }
+  .btn-confirm-del { background: var(--del); color: #fff; }
+  .btn-confirm-del:hover { filter: brightness(1.15); }
+
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--panel); border: 1px solid var(--accent);
+    color: var(--accent); padding: 12px 20px; border-radius: 10px;
+    font-size: 13px; font-family: 'JetBrains Mono', monospace;
+    opacity: 0; transform: translateY(10px);
+    transition: all 0.3s; pointer-events: none; z-index: 200;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  .auto-badge {
+    font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace;
+    display: flex; align-items: center; gap: 6px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">API <span>TEST</span> SERVER</div>
+  <a href="/" class="nav-link">← ダッシュボードへ</a>
+</header>
+
+<div class="hero">
+  <div class="hero-top">
+    <div>
+      <div class="hero-title">WEBHOOK <span>VIEWER</span></div>
+      <div style="font-size:13px; color:var(--muted); margin-top:4px;">FileAIから送られたWebhookを受信・記録・表示します</div>
+    </div>
+    <div class="auto-badge">
+      <div class="dot"></div>
+      <span id="auto-label">30秒ごとに自動更新</span>
+    </div>
+  </div>
+
+  <div class="endpoint-box">
+    <span class="badge-post">POST</span>
+    <span class="endpoint-url" id="webhook-url">読み込み中...</span>
+    <button class="copy-btn" onclick="copyUrl()">📋 コピー</button>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat">
+      <span class="stat-val" id="stat-count">—</span>
+      <span class="stat-label">受信件数</span>
+    </div>
+    <div class="stat">
+      <span class="stat-val" id="stat-latest">—</span>
+      <span class="stat-label">最終受信</span>
+    </div>
+  </div>
+</div>
+
+<div class="toolbar">
+  <div class="toolbar-left">
+    <span class="section-label">受信ログ</span>
+  </div>
+  <div style="display:flex; gap:8px;">
+    <button class="btn btn-refresh" onclick="loadLogs()">↺ 更新</button>
+    <button class="btn btn-clear" onclick="showClearModal()">🗑 ログを空にする</button>
+  </div>
+</div>
+
+<div class="content">
+  <div id="logs-container">
+    <div class="empty">Webhookをまだ受信していません</div>
+  </div>
+</div>
+
+<!-- 確認モーダル -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3>ログを空にしますか？</h3>
+    <p>保存されているWebhookのデータをすべて削除します。<br>この操作は取り消せません。</p>
+    <div class="modal-btns">
+      <button class="btn btn-cancel" onclick="hideModal()">キャンセル</button>
+      <button class="btn btn-confirm-del" onclick="clearLogs()">削除する</button>
+    </div>
+  </div>
+</div>
+
+<!-- トースト通知 -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // Webhookエンドポイントを表示
+  const webhookUrl = window.location.origin + '/webhook';
+  document.getElementById('webhook-url').textContent = webhookUrl;
+
+  function highlight(json) {
+    return json
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, m => {
+        let c = 'number';
+        if (/^"/.test(m)) c = /:$/.test(m) ? 'key' : 'string';
+        else if (/true|false/.test(m)) c = 'bool';
+        else if (/null/.test(m)) c = 'null';
+        return `<span class="${c}">${m}</span>`;
+      });
+  }
+
+  function formatTime(iso) {
+    return new Date(iso).toLocaleString('ja-JP', {
+      month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    });
+  }
+
+  function getPreview(data) {
+    try {
+      const s = JSON.stringify(data);
+      return s.length > 80 ? s.slice(0, 80) + '...' : s;
+    } catch { return '—'; }
+  }
+
+  function toggleCard(id) {
+    const body = document.getElementById('body-' + id);
+    const icon = document.getElementById('icon-' + id);
+    body.classList.toggle('open');
+    icon.classList.toggle('open');
+  }
+
+  async function loadLogs() {
+    try {
+      const res = await fetch('/webhook/logs');
+      const d = await res.json();
+      const logs = d.data || [];
+
+      document.getElementById('stat-count').textContent = logs.length;
+      document.getElementById('stat-latest').textContent =
+        logs.length ? formatTime(logs[0].receivedAt) : '—';
+
+      const container = document.getElementById('logs-container');
+      if (!logs.length) {
+        container.innerHTML = '<div class="empty">Webhookをまだ受信していません</div>';
+        return;
+      }
+
+      container.innerHTML = logs.map((log, i) => {
+        const idx = logs.length - i;
+        const preview = getPreview(log.data);
+        const jsonStr = JSON.stringify(log.data, null, 2);
+        return `
+          <div class="log-card">
+            <div class="log-card-header" onclick="toggleCard(${i})">
+              <span class="log-index">#${idx}</span>
+              <span class="log-time">${formatTime(log.receivedAt)}</span>
+              <span class="log-preview">${preview}</span>
+              <span class="toggle-icon" id="icon-${i}">▼</span>
+            </div>
+            <div class="log-card-body" id="body-${i}">
+              <div class="json-block">${highlight(jsonStr)}</div>
+            </div>
+          </div>`;
+      }).join('');
+    } catch(e) {
+      console.error(e);
+    }
+  }
+
+  function showClearModal() { document.getElementById('modal').classList.add('show'); }
+  function hideModal() { document.getElementById('modal').classList.remove('show'); }
+
+  async function clearLogs() {
+    hideModal();
+    await fetch('/webhook/logs', { method: 'DELETE' });
+    await loadLogs();
+    showToast('ログを削除しました');
+  }
+
+  function copyUrl() {
+    navigator.clipboard.writeText(webhookUrl).then(() => showToast('URLをコピーしました'));
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  // 初回ロード
+  loadLogs();
+
+  // 30秒ごとに自動更新
+  setInterval(loadLogs, 30000);
+</script>
+</body>
+</html>
