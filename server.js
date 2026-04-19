@@ -125,3 +125,83 @@ app.get('/api/transform', (req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+// ══════════════════════════════════════════════════
+//  Webhook V2
+//  条件: step === 'processing_finished' かつ status === 'completed'
+//  処理: fileIdsでFileAI APIを叩き、結果を合わせて保存
+// ══════════════════════════════════════════════════
+
+const WEBHOOK_V2_FILE = path.join(__dirname, 'webhook_v2_data.jsonl');
+if (!fs.existsSync(WEBHOOK_V2_FILE)) fs.writeFileSync(WEBHOOK_V2_FILE, '');
+
+// POST /webhookv2 ← FileAIからのWebhookを受け取る
+app.post('/webhookv2', async (req, res) => {
+  const body = req.body;
+  const step   = body.step;
+  const status = body.status;
+
+  console.log(`[webhookv2] received step=${step} status=${status}`);
+
+  // ── 条件チェック ──────────────────────────────
+  if (step !== 'processing_finished' || status !== 'completed') {
+    console.log('[webhookv2] skipped (condition not met)');
+    return res.status(200).json({ success: true, message: 'skipped: condition not met' });
+  }
+
+  // ── fileIds を取得 ────────────────────────────
+  const fileIds = body.fileIds || body.fileId || [];
+  const fileIdsArr = Array.isArray(fileIds) ? fileIds : [fileIds];
+
+  if (fileIdsArr.length === 0) {
+    console.log('[webhookv2] warning: fileIds is empty');
+  }
+
+  // ── FileAI API へ GET リクエスト ──────────────
+  let fileApiResult = null;
+  let fileApiError  = null;
+  try {
+    const fileIdsParam = encodeURIComponent(JSON.stringify(fileIdsArr));
+    const apiUrl = `https://api.orion.file.ai/prod/v1/files?page=1&limit=100&sortBy=createdAt&sortOrder=ASC&fileIds=${fileIdsParam}`;
+    console.log('[webhookv2] calling FileAI API:', apiUrl);
+
+    const apiRes = await fetch(apiUrl, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    fileApiResult = await apiRes.json();
+    console.log('[webhookv2] FileAI API response status:', apiRes.status);
+  } catch (e) {
+    fileApiError = e.message;
+    console.error('[webhookv2] FileAI API error:', e.message);
+  }
+
+  // ── ファイルに追記 ────────────────────────────
+  const record = {
+    receivedAt:    new Date().toISOString(),
+    webhookData:   body,
+    fileApiResult: fileApiResult,
+    fileApiError:  fileApiError,
+  };
+  fs.appendFileSync(WEBHOOK_V2_FILE, JSON.stringify(record) + '\n');
+  console.log('[webhookv2] saved record');
+
+  res.status(200).json({ success: true, message: 'Webhook v2 received and processed' });
+});
+
+// GET /webhookv2/logs
+app.get('/webhookv2/logs', (req, res) => {
+  const content = fs.readFileSync(WEBHOOK_V2_FILE, 'utf-8').trim();
+  if (!content) return res.json({ success: true, count: 0, data: [] });
+  const data = content.split('\n').filter(Boolean).map(line => {
+    try { return JSON.parse(line); } catch { return null; }
+  }).filter(Boolean);
+  res.json({ success: true, count: data.length, data: data.reverse() });
+});
+
+// DELETE /webhookv2/logs
+app.delete('/webhookv2/logs', (req, res) => {
+  fs.writeFileSync(WEBHOOK_V2_FILE, '');
+  console.log('[webhookv2] log cleared');
+  res.json({ success: true, message: 'Webhook v2 log cleared' });
+});

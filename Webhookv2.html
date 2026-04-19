@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Webhook V2 Viewer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c0f; --panel: #111418; --border: #1e2530;
+    --accent: #00e5a0; --accent2: #7c3aed; --del: #ff3b5c;
+    --warn: #f59e0b; --text: #e2e8f0; --muted: #4a5568; --code: #a8b8cc;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; min-height: 100vh; }
+
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 32px; border-bottom: 1px solid var(--border); background: var(--panel);
+  }
+  .logo { font-size: 18px; font-weight: 800; }
+  .logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 8px; }
+  .nav-link {
+    font-size: 13px; color: var(--muted); text-decoration: none;
+    padding: 6px 14px; border: 1px solid var(--border); border-radius: 6px; transition: all 0.15s;
+  }
+  .nav-link:hover { color: var(--text); border-color: var(--accent); }
+
+  .hero { background: var(--panel); border-bottom: 1px solid var(--border); padding: 28px 32px; }
+  .hero-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+  .hero-title { font-size: 22px; font-weight: 800; }
+  .hero-title span { color: var(--accent); }
+  .v2-badge {
+    background: rgba(124,58,237,0.2); color: #a78bfa;
+    font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px;
+    border: 1px solid rgba(124,58,237,0.4); letter-spacing: 1px; margin-left: 10px;
+  }
+
+  .condition-box {
+    margin-top: 16px; background: rgba(0,229,160,0.05);
+    border: 1px solid rgba(0,229,160,0.2); border-radius: 10px; padding: 12px 16px;
+    display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+  }
+  .cond-label { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+  .cond-item { display: flex; align-items: center; gap: 8px; }
+  .cond-key { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--code); }
+  .cond-val { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; color: var(--accent); }
+  .cond-sep { color: var(--muted); }
+
+  .endpoint-box {
+    display: flex; align-items: center; gap: 10px; margin-top: 14px;
+    background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px 16px; flex-wrap: wrap;
+  }
+  .badge {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700;
+    padding: 3px 8px; border-radius: 4px;
+  }
+  .badge-post { background: rgba(0,102,255,0.2); color: #60a5fa; }
+  .endpoint-url { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--accent); flex: 1; word-break: break-all; }
+  .copy-btn {
+    background: rgba(0,229,160,0.1); border: 1px solid rgba(0,229,160,0.3);
+    color: var(--accent); padding: 5px 12px; border-radius: 6px; cursor: pointer;
+    font-size: 12px; font-family: 'Syne', sans-serif; font-weight: 600; transition: all 0.15s; white-space: nowrap;
+  }
+  .copy-btn:hover { background: rgba(0,229,160,0.2); }
+
+  .stats-bar { display: flex; gap: 28px; margin-top: 16px; flex-wrap: wrap; }
+  .stat { display: flex; flex-direction: column; }
+  .stat-val { font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 700; color: var(--accent); }
+  .stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 32px; flex-wrap: wrap; gap: 12px;
+  }
+  .section-label { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+  .btn {
+    padding: 9px 18px; border: none; border-radius: 8px; cursor: pointer;
+    font-family: 'Syne', sans-serif; font-weight: 600; font-size: 13px;
+    transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-refresh { background: rgba(0,229,160,0.1); color: var(--accent); border: 1px solid rgba(0,229,160,0.25); }
+  .btn-refresh:hover { background: rgba(0,229,160,0.2); }
+  .btn-clear { background: rgba(255,59,92,0.1); color: var(--del); border: 1px solid rgba(255,59,92,0.25); }
+  .btn-clear:hover { background: rgba(255,59,92,0.2); }
+
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .auto-badge { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; display: flex; align-items: center; gap: 6px; }
+
+  .content { padding: 0 32px 40px; }
+
+  /* Log Card */
+  .log-card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 12px; margin-bottom: 14px; overflow: hidden;
+    animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+
+  .log-card-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 18px; border-bottom: 1px solid var(--border);
+    cursor: pointer; user-select: none;
+  }
+  .log-card-header:hover { background: rgba(255,255,255,0.02); }
+  .log-index {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700;
+    background: rgba(0,229,160,0.1); color: var(--accent); padding: 2px 8px; border-radius: 4px;
+  }
+  .log-time { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .log-fileids { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #a78bfa; flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .api-status-badge {
+    font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace; white-space: nowrap;
+  }
+  .api-ok { background: rgba(0,229,160,0.12); color: var(--accent); }
+  .api-err { background: rgba(255,59,92,0.12); color: var(--del); }
+  .toggle-icon { color: var(--muted); font-size: 12px; transition: transform 0.2s; }
+  .toggle-icon.open { transform: rotate(180deg); }
+
+  .log-card-body { display: none; }
+  .log-card-body.open { display: block; }
+
+  /* Sections inside card */
+  .card-section { padding: 16px 18px; border-bottom: 1px solid var(--border); }
+  .card-section:last-child { border-bottom: none; }
+  .card-section-title {
+    font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+  }
+  .card-section-title .dot-small {
+    width: 6px; height: 6px; border-radius: 50%;
+  }
+  .dot-webhook { background: #60a5fa; }
+  .dot-fileids { background: #a78bfa; }
+  .dot-fileapi { background: var(--accent); }
+
+  .fileids-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .fileid-tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    background: rgba(124,58,237,0.12); color: #a78bfa;
+    border: 1px solid rgba(124,58,237,0.25); padding: 3px 10px; border-radius: 6px;
+  }
+
+  .json-block {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    line-height: 1.7; white-space: pre-wrap; word-break: break-all; color: var(--code);
+    max-height: 350px; overflow-y: auto;
+  }
+  .json-block .key { color: #7dd3fc; }
+  .json-block .string { color: #86efac; }
+  .json-block .number { color: #fca5a5; }
+  .json-block .bool { color: #f0abfc; }
+  .json-block .null { color: var(--muted); }
+
+  .error-block {
+    background: rgba(255,59,92,0.05); border: 1px solid rgba(255,59,92,0.2);
+    border-radius: 8px; padding: 12px 16px;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--del);
+  }
+
+  .empty { color: var(--muted); font-size: 14px; text-align: center; padding: 60px; border: 1px dashed var(--border); border-radius: 12px; }
+
+  /* Modal */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.show { display: flex; }
+  .modal { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 28px; max-width: 400px; width: 90%; }
+  .modal h3 { font-size: 18px; margin-bottom: 10px; }
+  .modal p { font-size: 14px; color: var(--muted); margin-bottom: 24px; line-height: 1.6; }
+  .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
+  .btn-cancel { background: rgba(255,255,255,0.05); color: var(--text); border: 1px solid var(--border); }
+  .btn-cancel:hover { background: rgba(255,255,255,0.1); }
+  .btn-confirm-del { background: var(--del); color: #fff; border: none; }
+  .btn-confirm-del:hover { filter: brightness(1.15); }
+
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--panel); border: 1px solid var(--accent);
+    color: var(--accent); padding: 12px 20px; border-radius: 10px;
+    font-size: 13px; font-family: 'JetBrains Mono', monospace;
+    opacity: 0; transform: translateY(10px); transition: all 0.3s; pointer-events: none; z-index: 200;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">API <span>TEST</span> SERVER</div>
+  <div class="nav-links">
+    <a href="/" class="nav-link">← ダッシュボード</a>
+    <a href="/webhook.html" class="nav-link">Webhook V1</a>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-top">
+    <div>
+      <div class="hero-title">WEBHOOK <span>VIEWER</span> <span class="v2-badge">V2</span></div>
+      <div style="font-size:13px; color:var(--muted); margin-top:4px;">条件一致時のみ保存 → FileAI APIを自動取得して記録</div>
+    </div>
+    <div class="auto-badge"><div class="dot"></div><span>30秒ごとに自動更新</span></div>
+  </div>
+
+  <div class="condition-box">
+    <span class="cond-label">保存条件</span>
+    <div class="cond-item">
+      <span class="cond-key">step</span>
+      <span style="color:var(--muted)">=</span>
+      <span class="cond-val">"processing_finished"</span>
+    </div>
+    <span class="cond-sep">かつ</span>
+    <div class="cond-item">
+      <span class="cond-key">status</span>
+      <span style="color:var(--muted)">=</span>
+      <span class="cond-val">"completed"</span>
+    </div>
+  </div>
+
+  <div class="endpoint-box">
+    <span class="badge badge-post">POST</span>
+    <span class="endpoint-url" id="webhook-url">読み込み中...</span>
+    <button class="copy-btn" onclick="copyUrl()">📋 コピー</button>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat">
+      <span class="stat-val" id="stat-count">—</span>
+      <span class="stat-label">保存件数</span>
+    </div>
+    <div class="stat">
+      <span class="stat-val" id="stat-latest">—</span>
+      <span class="stat-label">最終受信</span>
+    </div>
+  </div>
+</div>
+
+<div class="toolbar">
+  <span class="section-label">受信ログ（条件一致のみ）</span>
+  <div style="display:flex; gap:8px;">
+    <button class="btn btn-refresh" onclick="loadLogs()">↺ 更新</button>
+    <button class="btn btn-clear" onclick="showClearModal()">🗑 ログを空にする</button>
+  </div>
+</div>
+
+<div class="content">
+  <div id="logs-container">
+    <div class="empty">条件を満たすWebhookをまだ受信していません</div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3>ログを空にしますか？</h3>
+    <p>保存されているWebhook V2のデータをすべて削除します。<br>この操作は取り消せません。</p>
+    <div class="modal-btns">
+      <button class="btn btn-cancel" onclick="hideModal()">キャンセル</button>
+      <button class="btn btn-confirm-del" onclick="clearLogs()">削除する</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const webhookUrl = window.location.origin + '/webhookv2';
+  document.getElementById('webhook-url').textContent = webhookUrl;
+
+  function highlight(json) {
+    return json
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, m => {
+        let c = 'number';
+        if (/^"/.test(m)) c = /:$/.test(m) ? 'key' : 'string';
+        else if (/true|false/.test(m)) c = 'bool';
+        else if (/null/.test(m)) c = 'null';
+        return `<span class="${c}">${m}</span>`;
+      });
+  }
+
+  function formatTime(iso) {
+    return new Date(iso).toLocaleString('ja-JP', {
+      month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    });
+  }
+
+  function toggleCard(i) {
+    document.getElementById('body-' + i).classList.toggle('open');
+    document.getElementById('icon-' + i).classList.toggle('open');
+  }
+
+  async function loadLogs() {
+    try {
+      const res = await fetch('/webhookv2/logs');
+      const d = await res.json();
+      const logs = d.data || [];
+
+      document.getElementById('stat-count').textContent = logs.length;
+      document.getElementById('stat-latest').textContent =
+        logs.length ? formatTime(logs[0].receivedAt) : '—';
+
+      const container = document.getElementById('logs-container');
+      if (!logs.length) {
+        container.innerHTML = '<div class="empty">条件を満たすWebhookをまだ受信していません</div>';
+        return;
+      }
+
+      container.innerHTML = logs.map((log, i) => {
+        const idx = logs.length - i;
+        const fileIds = log.webhookData?.fileIds || log.webhookData?.fileId || [];
+        const fileIdsArr = Array.isArray(fileIds) ? fileIds : [fileIds];
+        const hasApiErr = !!log.fileApiError;
+        const fileIdsDisplay = fileIdsArr.length ? fileIdsArr.join(', ') : '(なし)';
+
+        const webhookJson = JSON.stringify(log.webhookData, null, 2);
+        const fileApiJson = log.fileApiResult ? JSON.stringify(log.fileApiResult, null, 2) : null;
+
+        return `
+          <div class="log-card">
+            <div class="log-card-header" onclick="toggleCard(${i})">
+              <span class="log-index">#${idx}</span>
+              <span class="log-time">${formatTime(log.receivedAt)}</span>
+              <span class="log-fileids">fileIds: ${fileIdsDisplay}</span>
+              <span class="api-status-badge ${hasApiErr ? 'api-err' : 'api-ok'}">
+                ${hasApiErr ? '⚠ API Error' : '✓ API OK'}
+              </span>
+              <span class="toggle-icon" id="icon-${i}">▼</span>
+            </div>
+            <div class="log-card-body" id="body-${i}">
+
+              <!-- Webhook 受信データ -->
+              <div class="card-section">
+                <div class="card-section-title">
+                  <span class="dot-small dot-webhook"></span>
+                  Webhook 受信データ
+                </div>
+                <div class="json-block">${highlight(webhookJson)}</div>
+              </div>
+
+              <!-- fileIds -->
+              <div class="card-section">
+                <div class="card-section-title">
+                  <span class="dot-small dot-fileids"></span>
+                  抽出された fileIds
+                </div>
+                <div class="fileids-list">
+                  ${fileIdsArr.length
+                    ? fileIdsArr.map(id => `<span class="fileid-tag">${id}</span>`).join('')
+                    : '<span style="color:var(--muted); font-size:13px;">fileIdsが見つかりませんでした</span>'
+                  }
+                </div>
+              </div>
+
+              <!-- FileAI API レスポンス -->
+              <div class="card-section">
+                <div class="card-section-title">
+                  <span class="dot-small dot-fileapi"></span>
+                  FileAI API レスポンス
+                </div>
+                ${hasApiErr
+                  ? `<div class="error-block">⚠ APIエラー: ${log.fileApiError}</div>`
+                  : fileApiJson
+                    ? `<div class="json-block">${highlight(fileApiJson)}</div>`
+                    : '<div style="color:var(--muted); font-size:13px;">レスポンスなし</div>'
+                }
+              </div>
+
+            </div>
+          </div>`;
+      }).join('');
+    } catch(e) {
+      console.error(e);
+    }
+  }
+
+  function showClearModal() { document.getElementById('modal').classList.add('show'); }
+  function hideModal() { document.getElementById('modal').classList.remove('show'); }
+
+  async function clearLogs() {
+    hideModal();
+    await fetch('/webhookv2/logs', { method: 'DELETE' });
+    await loadLogs();
+    showToast('ログを削除しました');
+  }
+
+  function copyUrl() {
+    navigator.clipboard.writeText(webhookUrl).then(() => showToast('URLをコピーしました'));
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  loadLogs();
+  setInterval(loadLogs, 30000);
+</script>
+</body>
+</html>
