@@ -123,14 +123,18 @@ app.get('/api/transform', (req, res) => {
 
 // ══════════════════════════════════════════════════
 //  FileAI アップロード プロキシ
-//  ブラウザのCORS制限を回避するためサーバー経由でAPIを叩く
+//  STEP1: Presigned URL取得
+//  STEP2: ファイルをサーバー経由でS3にPUT（CORSを回避）
 // ══════════════════════════════════════════════════
+
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage() });
 
 const FILE_AI_API_KEY = 'sk-l2BMqsi5V46OYUebgH7BfRY3xwRR5qbvDPd0EG8qbo3ic9AD';
 const FILE_AI_UPLOAD  = 'https://api.orion.file.ai/prod/v1/files/upload';
 
 // STEP1: Presigned URL を取得してブラウザに返す
-app.post('/proxy/upload', async (req, res) => {
+app.post('/proxy/upload/init', async (req, res) => {
   const { fileName, fileType } = req.body;
   if (!fileName || !fileType) {
     return res.status(400).json({ success: false, message: 'fileName と fileType は必須です' });
@@ -146,21 +150,50 @@ app.post('/proxy/upload', async (req, res) => {
         fileName,
         fileType,
         isSplit:       false,
-        schemaLocking: false
+        isSplitExcel:  false,
+        schemaLocking: false,
+        isEphemeral:   false
       })
     });
     const data = await apiRes.json();
     if (!apiRes.ok) {
-      console.error('[proxy/upload] FileAI error:', data);
+      console.error('[proxy/upload/init] FileAI error:', data);
       return res.status(apiRes.status).json({ success: false, message: JSON.stringify(data) });
     }
-    console.log(`[proxy/upload] presigned URL issued for: ${fileName}`);
+    console.log(`[proxy/upload/init] presigned URL issued for: ${fileName}`);
     res.json({ success: true, data });
   } catch (e) {
-    console.error('[proxy/upload] fetch error:', e.message);
+    console.error('[proxy/upload/init] fetch error:', e.message);
     res.status(500).json({ success: false, message: e.message });
   }
 });
+
+// STEP2: ブラウザからファイルを受け取り、サーバーからS3にPUT
+app.post('/proxy/upload/put', upload.single('file'), async (req, res) => {
+  const { presignedUploadURL, fileType } = req.body;
+  if (!presignedUploadURL || !req.file) {
+    return res.status(400).json({ success: false, message: 'presignedUploadURL とファイルは必須です' });
+  }
+  try {
+    console.log(`[proxy/upload/put] uploading: ${req.file.originalname} (${req.file.size} bytes)`);
+    const s3Res = await fetch(presignedUploadURL, {
+      method: 'PUT',
+      headers: { 'Content-Type': fileType || req.file.mimetype || 'application/octet-stream' },
+      body: req.file.buffer
+    });
+    if (!s3Res.ok) {
+      const errText = await s3Res.text();
+      console.error('[proxy/upload/put] S3 error:', s3Res.status, errText);
+      return res.status(s3Res.status).json({ success: false, message: `S3エラー (${s3Res.status}): ${errText}` });
+    }
+    console.log('[proxy/upload/put] S3 upload success');
+    res.json({ success: true, message: 'アップロード完了' });
+  } catch (e) {
+    console.error('[proxy/upload/put] fetch error:', e.message);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 
 // ポートバインド（Render対応）
 app.listen(PORT, '0.0.0.0', () => {
