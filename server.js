@@ -152,7 +152,8 @@ app.post('/proxy/upload/init', async (req, res) => {
         isSplit:       false,
         isSplitExcel:  false,
         schemaLocking: false,
-        isEphemeral:   false
+        isEphemeral:   false,
+        callbackURL:   `https://nodedemo-uxsd.onrender.com/webhookv2/`
       })
     });
     const data = await apiRes.json();
