@@ -1,115 +1,133 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>API Test Server v1.0</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<title>API Test Server</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:#0a0c0f; --panel:#111418; --border:#1e2530;
-    --accent:#00e5a0; --del:#ff3b5c; --text:#e2e8f0; --muted:#4a5568; --code:#a8b8cc;
+    --bg:#f0f4f8; --surface:#ffffff; --surface2:#f8fafc; --border:#e2e8f0; --border2:#cbd5e1;
+    --text:#1e293b; --muted:#64748b; --subtle:#94a3b8;
+    --accent:#2563eb; --accent-bg:#eff6ff; --accent-border:#bfdbfe;
+    --green:#059669; --green-bg:#ecfdf5; --green-border:#a7f3d0;
+    --red:#dc2626; --red-bg:#fef2f2; --red-border:#fecaca;
+    --amber:#d97706; --amber-bg:#fffbeb; --amber-border:#fde68a;
+    --purple:#7c3aed; --purple-bg:#f5f3ff; --purple-border:#ddd6fe;
   }
-  * { box-sizing:border-box; margin:0; padding:0; }
-  body { background:var(--bg); color:var(--text); font-family:'Syne',sans-serif; min-height:100vh; }
-  header {
-    display:flex; align-items:center; justify-content:space-between;
-    padding:16px 32px; border-bottom:1px solid var(--border); background:var(--panel);
-  }
-  .logo { font-size:18px; font-weight:800; }
-  .logo span { color:var(--accent); }
-  .nav-links { display:flex; gap:8px; align-items:center; }
-  .nav-link {
-    font-size:13px; color:var(--muted); text-decoration:none;
-    padding:6px 14px; border:1px solid var(--border); border-radius:6px; transition:all 0.15s;
-  }
-  .nav-link:hover { color:var(--text); border-color:var(--accent); }
-  .nav-current { font-size:13px; color:var(--accent); padding:6px 14px; border:1px solid rgba(0,229,160,0.3); border-radius:6px; font-weight:700; }
-  .ver-badge { font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:var(--accent); background:rgba(0,229,160,0.1); border:1px solid rgba(0,229,160,0.25); padding:2px 10px; border-radius:20px; margin-left:10px; }
-  .page { max-width:800px; margin:48px auto; padding:0 24px 60px; }
-  .page-title { font-size:30px; font-weight:800; margin-bottom:6px; display:flex; align-items:center; }
-  .page-title span { color:var(--accent); }
-  .subtitle { font-size:14px; color:var(--muted); margin-bottom:40px; }
-  .cards { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-  .card {
-    background:var(--panel); border:1px solid var(--border); border-radius:14px;
-    padding:24px 24px 20px; text-decoration:none; color:var(--text);
-    transition:all 0.2s; display:flex; flex-direction:column; gap:10px;
-  }
-  .card:hover { border-color:var(--accent); background:rgba(0,229,160,0.04); transform:translateY(-2px); }
-  .card-icon { font-size:28px; }
-  .card-title { font-size:16px; font-weight:800; }
-  .card-desc { font-size:13px; color:var(--muted); line-height:1.6; }
-  .card-url { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--accent); margin-top:4px; }
-  .section-label { font-size:11px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:14px; margin-top:36px; }
-  .endpoint-list { background:var(--panel); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
-  .endpoint-row { display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid var(--border); font-family:'JetBrains Mono',monospace; font-size:13px; }
-  .endpoint-row:last-child { border-bottom:none; }
-  .badge { font-size:10px; font-weight:700; padding:2px 8px; border-radius:4px; min-width:52px; text-align:center; }
-  .get    { background:rgba(0,229,160,0.15); color:var(--accent); }
-  .post   { background:rgba(0,102,255,0.15); color:#60a5fa; }
-  .delete { background:rgba(255,59,92,0.15);  color:var(--del); }
-  .ep-path { color:var(--code); flex:1; }
-  .ep-desc { font-size:11px; color:var(--muted); font-family:'Syne',sans-serif; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;}
+  header{background:var(--surface);border-bottom:1px solid var(--border);padding:13px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;box-shadow:0 1px 3px rgba(0,0,0,0.06);}
+  .logo{font-size:15px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;}
+  .logo-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:blink 2s infinite;}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+  .nav{display:flex;align-items:center;gap:6px;}
+  .nav-link{font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:5px 13px;border-radius:7px;border:1px solid var(--border);transition:all 0.15s;}
+  .nav-link:hover{color:var(--accent);border-color:var(--accent-border);background:var(--accent-bg);}
+  .nav-active{color:var(--accent);border-color:var(--accent-border);background:var(--accent-bg);}
+  .lang-toggle{display:flex;border:1px solid var(--border);border-radius:7px;overflow:hidden;margin-left:6px;}
+  .lang-btn{padding:5px 11px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted);transition:all 0.15s;font-family:'Inter',sans-serif;}
+  .lang-btn.active{background:var(--accent);color:#fff;}
+  .lang-btn:hover:not(.active){background:var(--surface2);}
+  .page{max-width:840px;margin:0 auto;padding:40px 24px 80px;}
+  .page-header{margin-bottom:36px;}
+  .page-header h1{font-size:26px;font-weight:700;margin-bottom:5px;}
+  .page-header p{font-size:14px;color:var(--muted);}
+  .section-label{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--subtle);margin-bottom:12px;margin-top:32px;}
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;text-decoration:none;color:var(--text);transition:all 0.15s;display:flex;flex-direction:column;gap:8px;}
+  .card:hover{border-color:var(--accent-border);box-shadow:0 4px 16px rgba(37,99,235,0.1);transform:translateY(-1px);}
+  .card-icon{font-size:22px;}
+  .card-title{font-size:15px;font-weight:600;}
+  .card-desc{font-size:13px;color:var(--muted);line-height:1.6;}
+  .card-url{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);margin-top:4px;}
+  .endpoint-table{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+  .ep-row{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--border);}
+  .ep-row:last-child{border-bottom:none;}
+  .ep-row:hover{background:var(--surface2);}
+  .badge{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;min-width:50px;text-align:center;}
+  .badge-get{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}
+  .badge-post{background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent-border);}
+  .badge-del{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border);}
+  .ep-path{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text);flex:1;}
+  .ep-desc{font-size:12px;color:var(--muted);}
 </style>
 </head>
 <body>
 <header>
-  <div class="logo">API <span>TEST</span> SERVER</div>
-  <div class="nav-links">
-    <span class="nav-current">Top</span>
-    <a href="/upload.html" class="nav-link">Upload</a>
-    <a href="/webhook.html" class="nav-link">Webhook V1</a>
-    <a href="/webhookv2.html" class="nav-link">Webhook V2</a>
-  </div>
+  <div class="logo"><div class="logo-dot"></div>API Test Server</div>
+  <nav class="nav">
+    <span class="nav-link nav-active" data-en="Top" data-ja="トップ">Top</span>
+    <a href="/upload.html" class="nav-link" data-en="Upload" data-ja="アップロード">Upload</a>
+    <a href="/webhook.html" class="nav-link" data-en="Webhook V1" data-ja="Webhook V1">Webhook V1</a>
+    <a href="/webhookv2.html" class="nav-link" data-en="Webhook V2" data-ja="Webhook V2">Webhook V2</a>
+    <div class="lang-toggle">
+      <button class="lang-btn active" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" onclick="setLang('ja')">JP</button>
+    </div>
+  </nav>
 </header>
-<div class="page">
-  <div class="page-title">API <span>&nbsp;TEST&nbsp;</span> SERVER <span class="ver-badge">v1.0</span></div>
-  <div class="subtitle">Node.js + Express による REST API 検証サーバー（Render ホスティング）</div>
 
-  <div class="section-label">ページ一覧</div>
+<div class="page">
+  <div class="page-header">
+    <h1 data-en="API Test Server" data-ja="API テストサーバー">API Test Server</h1>
+    <p data-en="Node.js + Express REST API verification server (hosted on Render)" data-ja="Node.js + Express による REST API 検証サーバー（Render ホスティング）">Node.js + Express REST API verification server (hosted on Render)</p>
+  </div>
+
+  <div class="section-label" data-en="Pages" data-ja="ページ一覧">Pages</div>
   <div class="cards">
     <a href="/upload.html" class="card">
       <div class="card-icon">📤</div>
-      <div class="card-title">File Upload <span style="font-size:11px;color:var(--accent);font-family:'JetBrains Mono',monospace;">v1.6</span></div>
-      <div class="card-desc">ローカルファイルを選択して FileAI にアップロード。Presigned URL 経由で S3 に直接送信。</div>
+      <div class="card-title" data-en="File Upload" data-ja="ファイルアップロード">File Upload</div>
+      <div class="card-desc" data-en="Select a local file and upload it to FileAI via Presigned URL directly to S3." data-ja="ローカルファイルを選択して FileAI に Presigned URL 経由で S3 に直接送信。">Select a local file and upload it to FileAI via Presigned URL directly to S3.</div>
       <div class="card-url">/upload.html</div>
     </a>
     <a href="/webhook.html" class="card">
       <div class="card-icon">📡</div>
-      <div class="card-title">Webhook V1 <span style="font-size:11px;color:var(--accent);font-family:'JetBrains Mono',monospace;">v1.2</span></div>
-      <div class="card-desc">FileAI からの Webhook を受信してログとして記録・表示。すべてのリクエストを保存。</div>
+      <div class="card-title" data-en="Webhook V1" data-ja="Webhook V1">Webhook V1</div>
+      <div class="card-desc" data-en="Receive and log all incoming Webhooks from FileAI. Every request is saved." data-ja="FileAI からの Webhook を受信してすべてのリクエストをログとして記録・表示。">Receive and log all incoming Webhooks from FileAI. Every request is saved.</div>
       <div class="card-url">/webhook.html</div>
     </a>
     <a href="/webhookv2.html" class="card">
       <div class="card-icon">🔔</div>
-      <div class="card-title">Webhook V2 <span style="font-size:11px;color:var(--accent);font-family:'JetBrains Mono',monospace;">v1.4</span></div>
-      <div class="card-desc">条件フィルタ付き Webhook。processing_finished + completed 時のみ保存し FileAI API を自動取得。</div>
+      <div class="card-title" data-en="Webhook V2" data-ja="Webhook V2">Webhook V2</div>
+      <div class="card-desc" data-en="Filtered Webhook — saves only when step=processing_finished & status=completed, then auto-fetches FileAI API." data-ja="条件フィルタ付き Webhook。processing_finished + completed 時のみ保存し FileAI API を自動取得。">Filtered Webhook — saves only when step=processing_finished &amp; status=completed, then auto-fetches FileAI API.</div>
       <div class="card-url">/webhookv2.html</div>
     </a>
     <a href="/api/items" class="card">
       <div class="card-icon">🗄</div>
-      <div class="card-title">Items API</div>
-      <div class="card-desc">汎用 CRUD API。メモリ上にデータを保持（再起動でリセット）。検証・動作確認用。</div>
+      <div class="card-title" data-en="Items API" data-ja="アイテム API">Items API</div>
+      <div class="card-desc" data-en="General-purpose CRUD API. Data is held in memory (resets on restart). For testing." data-ja="汎用 CRUD API。メモリ上にデータを保持（再起動でリセット）。検証・動作確認用。">General-purpose CRUD API. Data is held in memory (resets on restart). For testing.</div>
       <div class="card-url">/api/items</div>
     </a>
   </div>
 
-  <div class="section-label">APIエンドポイント一覧</div>
-  <div class="endpoint-list">
-    <div class="endpoint-row"><span class="badge post">POST</span><span class="ep-path">/webhook</span><span class="ep-desc">Webhook V1 受信</span></div>
-    <div class="endpoint-row"><span class="badge get">GET</span><span class="ep-path">/webhook/logs</span><span class="ep-desc">V1ログ一覧</span></div>
-    <div class="endpoint-row"><span class="badge delete">DEL</span><span class="ep-path">/webhook/logs</span><span class="ep-desc">V1ログクリア</span></div>
-    <div class="endpoint-row"><span class="badge post">POST</span><span class="ep-path">/webhookv2</span><span class="ep-desc">Webhook V2 受信（条件フィルタ + FileAI API取得）</span></div>
-    <div class="endpoint-row"><span class="badge get">GET</span><span class="ep-path">/webhookv2/logs</span><span class="ep-desc">V2ログ一覧</span></div>
-    <div class="endpoint-row"><span class="badge delete">DEL</span><span class="ep-path">/webhookv2/logs</span><span class="ep-desc">V2ログクリア</span></div>
-    <div class="endpoint-row"><span class="badge post">POST</span><span class="ep-path">/proxy/upload/init</span><span class="ep-desc">Presigned URL 取得（FileAI）</span></div>
-    <div class="endpoint-row"><span class="badge post">POST</span><span class="ep-path">/proxy/upload/put</span><span class="ep-desc">S3 アップロード（サーバー経由）</span></div>
-    <div class="endpoint-row"><span class="badge get">GET</span><span class="ep-path">/api/items</span><span class="ep-desc">アイテム一覧</span></div>
-    <div class="endpoint-row"><span class="badge post">POST</span><span class="ep-path">/api/items</span><span class="ep-desc">アイテム作成</span></div>
-    <div class="endpoint-row"><span class="badge get">GET</span><span class="ep-path">/api/transform</span><span class="ep-desc">カテゴリ別集計</span></div>
+  <div class="section-label" data-en="API Endpoints" data-ja="APIエンドポイント一覧">API Endpoints</div>
+  <div class="endpoint-table">
+    <div class="ep-row"><span class="badge badge-post">POST</span><span class="ep-path">/webhook</span><span class="ep-desc" data-en="Receive Webhook V1" data-ja="Webhook V1 受信">Receive Webhook V1</span></div>
+    <div class="ep-row"><span class="badge badge-get">GET</span><span class="ep-path">/webhook/logs</span><span class="ep-desc" data-en="V1 log list" data-ja="V1ログ一覧">V1 log list</span></div>
+    <div class="ep-row"><span class="badge badge-del">DEL</span><span class="ep-path">/webhook/logs</span><span class="ep-desc" data-en="Clear V1 logs" data-ja="V1ログクリア">Clear V1 logs</span></div>
+    <div class="ep-row"><span class="badge badge-post">POST</span><span class="ep-path">/webhookv2</span><span class="ep-desc" data-en="Receive Webhook V2 (filter + FileAI API fetch)" data-ja="Webhook V2 受信（条件フィルタ + FileAI API取得）">Receive Webhook V2 (filter + FileAI API fetch)</span></div>
+    <div class="ep-row"><span class="badge badge-get">GET</span><span class="ep-path">/webhookv2/logs</span><span class="ep-desc" data-en="V2 log list" data-ja="V2ログ一覧">V2 log list</span></div>
+    <div class="ep-row"><span class="badge badge-del">DEL</span><span class="ep-path">/webhookv2/logs</span><span class="ep-desc" data-en="Clear V2 logs" data-ja="V2ログクリア">Clear V2 logs</span></div>
+    <div class="ep-row"><span class="badge badge-post">POST</span><span class="ep-path">/proxy/upload/init</span><span class="ep-desc" data-en="Get Presigned URL (FileAI)" data-ja="Presigned URL 取得（FileAI）">Get Presigned URL (FileAI)</span></div>
+    <div class="ep-row"><span class="badge badge-post">POST</span><span class="ep-path">/proxy/upload/put</span><span class="ep-desc" data-en="Upload to S3 via server" data-ja="S3 アップロード（サーバー経由）">Upload to S3 via server</span></div>
+    <div class="ep-row"><span class="badge badge-get">GET</span><span class="ep-path">/api/items</span><span class="ep-desc" data-en="List all items" data-ja="アイテム一覧">List all items</span></div>
+    <div class="ep-row"><span class="badge badge-post">POST</span><span class="ep-path">/api/items</span><span class="ep-desc" data-en="Create item" data-ja="アイテム作成">Create item</span></div>
+    <div class="ep-row"><span class="badge badge-get">GET</span><span class="ep-path">/api/transform</span><span class="ep-desc" data-en="Aggregated stats by category" data-ja="カテゴリ別集計">Aggregated stats by category</span></div>
   </div>
 </div>
+
+<script>
+function setLang(lang) {
+  localStorage.setItem('lang', lang);
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.textContent.toLowerCase() === lang));
+  document.querySelectorAll('[data-en]').forEach(el => {
+    el.textContent = el.dataset[lang] || el.dataset.en;
+  });
+  document.documentElement.lang = lang === 'ja' ? 'ja' : 'en';
+}
+(function(){ setLang(localStorage.getItem('lang') || 'en'); })();
+</script>
 </body>
 </html>

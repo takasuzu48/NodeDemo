@@ -1,135 +1,123 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>File Upload – FileAI v1.7</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<title>File Upload – FileAI</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0a0c0f; --panel: #111418; --border: #1e2530;
-    --accent: #00e5a0; --del: #ff3b5c; --warn: #f59e0b;
-    --text: #e2e8f0; --muted: #4a5568; --code: #a8b8cc;
+  :root{
+    --bg:#f0f4f8;--surface:#ffffff;--surface2:#f8fafc;--border:#e2e8f0;
+    --text:#1e293b;--muted:#64748b;--subtle:#94a3b8;
+    --accent:#2563eb;--accent-bg:#eff6ff;--accent-border:#bfdbfe;
+    --green:#059669;--green-bg:#ecfdf5;--green-border:#a7f3d0;
+    --red:#dc2626;--red-bg:#fef2f2;--red-border:#fecaca;
+    --amber:#d97706;--amber-bg:#fffbeb;--amber-border:#fde68a;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; min-height: 100vh; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;}
+  header{background:var(--surface);border-bottom:1px solid var(--border);padding:13px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;box-shadow:0 1px 3px rgba(0,0,0,0.06);}
+  .logo{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;}
+  .logo-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:blink 2s infinite;}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+  .nav{display:flex;align-items:center;gap:6px;}
+  .nav-link{font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:5px 13px;border-radius:7px;border:1px solid var(--border);transition:all 0.15s;}
+  .nav-link:hover{color:var(--accent);border-color:var(--accent-border);background:var(--accent-bg);}
+  .nav-active{color:var(--accent);border-color:var(--accent-border);background:var(--accent-bg);}
+  .lang-toggle{display:flex;border:1px solid var(--border);border-radius:7px;overflow:hidden;margin-left:6px;}
+  .lang-btn{padding:5px 11px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted);transition:all 0.15s;font-family:'Inter',sans-serif;}
+  .lang-btn.active{background:var(--accent);color:#fff;}
+  .lang-btn:hover:not(.active){background:var(--surface2);}
 
-  header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 16px 32px; border-bottom: 1px solid var(--border); background: var(--panel);
-  }
-  .logo { font-size: 18px; font-weight: 800; }
-  .logo span { color: var(--accent); }
-  .nav-links { display: flex; gap: 8px; }
-  .nav-link {
-    font-size: 13px; color: var(--muted); text-decoration: none;
-    padding: 6px 14px; border: 1px solid var(--border); border-radius: 6px; transition: all 0.15s;
-  }
-  .nav-link:hover { color: var(--text); border-color: var(--accent); }
-  .nav-current { font-size:13px; color:var(--accent); padding:6px 14px; border:1px solid rgba(0,229,160,0.3); border-radius:6px; font-weight:700; }
-  .ver-badge-header { font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:var(--accent); background:rgba(0,229,160,0.1); border:1px solid rgba(0,229,160,0.25); padding:2px 10px; border-radius:20px; margin-left:8px; vertical-align:middle; }
+  .page{max-width:680px;margin:0 auto;padding:40px 24px 80px;}
+  .page-header{margin-bottom:32px;}
+  .page-header h1{font-size:24px;font-weight:700;margin-bottom:5px;}
+  .page-header p{font-size:14px;color:var(--muted);}
 
-  .page { max-width: 680px; margin: 48px auto; padding: 0 24px 60px; }
-  h1 { font-size: 28px; font-weight: 800; margin-bottom: 6px; }
-  h1 span { color: var(--accent); }
-  .subtitle { font-size: 14px; color: var(--muted); margin-bottom: 36px; }
+  .dropzone{border:2px dashed var(--border2, #cbd5e1);border-radius:14px;padding:44px 24px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;background:var(--surface);}
+  .dropzone:hover,.dropzone.drag-over{border-color:var(--accent);background:var(--accent-bg);}
+  .dropzone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+  .drop-icon{font-size:38px;margin-bottom:12px;}
+  .drop-title{font-size:16px;font-weight:600;margin-bottom:5px;}
+  .drop-sub{font-size:13px;color:var(--muted);}
 
-  .dropzone {
-    border: 2px dashed var(--border); border-radius: 16px;
-    padding: 48px 24px; text-align: center; cursor: pointer;
-    transition: all 0.2s; position: relative; background: var(--panel);
-  }
-  .dropzone:hover, .dropzone.drag-over { border-color: var(--accent); background: rgba(0,229,160,0.04); }
-  .dropzone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-  .drop-icon { font-size: 40px; margin-bottom: 12px; }
-  .drop-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
-  .drop-sub { font-size: 13px; color: var(--muted); }
+  .file-info{display:none;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:15px 18px;margin-top:14px;}
+  .file-info.show{display:flex;align-items:center;gap:14px;}
+  .file-icon{font-size:26px;}
+  .file-details{flex:1;}
+  .file-name{font-weight:600;font-size:14px;word-break:break-all;}
+  .file-meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);margin-top:3px;}
+  .file-remove{background:none;border:none;color:var(--muted);cursor:pointer;font-size:17px;padding:4px;transition:color 0.15s;}
+  .file-remove:hover{color:var(--red);}
 
-  .file-info { display: none; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; margin-top: 16px; }
-  .file-info.show { display: flex; align-items: center; gap: 16px; }
-  .file-icon { font-size: 28px; }
-  .file-details { flex: 1; }
-  .file-name { font-weight: 700; font-size: 15px; word-break: break-all; }
-  .file-meta { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); margin-top: 4px; }
-  .file-remove { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 18px; padding: 4px; transition: color 0.15s; }
-  .file-remove:hover { color: var(--del); }
+  .btn-upload{width:100%;margin-top:18px;padding:15px;background:var(--accent);color:#fff;border:none;border-radius:12px;font-family:'Inter',sans-serif;font-weight:700;font-size:15px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .btn-upload:hover:not(:disabled){background:#1d4ed8;transform:translateY(-1px);}
+  .btn-upload:disabled{background:var(--border);color:var(--muted);cursor:not-allowed;transform:none;}
 
-  .btn-upload {
-    width: 100%; margin-top: 20px; padding: 16px;
-    background: var(--accent); color: #000; border: none; border-radius: 12px;
-    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px;
-    cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;
-  }
-  .btn-upload:hover:not(:disabled) { background: #00ffb3; transform: translateY(-1px); }
-  .btn-upload:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; transform: none; }
+  .progress-wrap{display:none;margin-top:18px;}
+  .progress-wrap.show{display:block;}
+  .progress-label{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:7px;}
+  .progress-label span{font-family:'JetBrains Mono',monospace;}
+  .progress-bar-bg{height:6px;background:var(--border);border-radius:99px;overflow:hidden;}
+  .progress-bar{height:100%;background:var(--accent);border-radius:99px;width:0%;transition:width 0.3s;}
 
-  .progress-wrap { display: none; margin-top: 20px; }
-  .progress-wrap.show { display: block; }
-  .progress-label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); margin-bottom: 8px; }
-  .progress-label span { font-family: 'JetBrains Mono', monospace; }
-  .progress-bar-bg { height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; }
-  .progress-bar { height: 100%; background: var(--accent); border-radius: 99px; width: 0%; transition: width 0.3s; }
+  .steps{display:flex;flex-direction:column;gap:8px;margin-top:18px;}
+  .step{display:flex;align-items:center;gap:12px;padding:11px 15px;border-radius:10px;border:1px solid var(--border);background:var(--surface);font-size:14px;transition:all 0.2s;}
+  .step-icon{font-size:15px;width:22px;text-align:center;}
+  .step-label{flex:1;}
+  .step-status{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);}
+  .step.pending{opacity:0.5;}
+  .step.active{border-color:var(--amber-border);background:var(--amber-bg);}
+  .step.active .step-status{color:var(--amber);}
+  .step.done{border-color:var(--green-border);background:var(--green-bg);}
+  .step.done .step-status{color:var(--green);}
+  .step.error{border-color:var(--red-border);background:var(--red-bg);}
+  .step.error .step-status{color:var(--red);}
 
-  .steps { display: flex; flex-direction: column; gap: 8px; margin-top: 20px; }
-  .step {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border);
-    background: var(--panel); font-size: 14px; transition: all 0.2s;
-  }
-  .step-icon { font-size: 16px; width: 24px; text-align: center; }
-  .step-label { flex: 1; }
-  .step-status { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); }
-  .step.pending { opacity: 0.5; }
-  .step.active { border-color: var(--warn); background: rgba(245,158,11,0.05); }
-  .step.active .step-status { color: var(--warn); }
-  .step.done { border-color: rgba(0,229,160,0.3); background: rgba(0,229,160,0.05); }
-  .step.done .step-status { color: var(--accent); }
-  .step.error { border-color: rgba(255,59,92,0.3); background: rgba(255,59,92,0.05); }
-  .step.error .step-status { color: var(--del); }
+  .result-box{display:none;margin-top:18px;border-radius:12px;padding:18px;border:1px solid var(--green-border);background:var(--green-bg);}
+  .result-box.show{display:block;}
+  .result-box.error-box{border-color:var(--red-border);background:var(--red-bg);}
+  .result-title{font-size:15px;font-weight:700;margin-bottom:12px;}
+  .result-title.err{color:var(--red);}
+  .result-row{display:flex;gap:8px;margin-bottom:6px;}
+  .result-key{color:var(--muted);min-width:90px;font-family:'JetBrains Mono',monospace;font-size:12px;}
+  .result-val{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text);word-break:break-all;}
+  .result-val.accent{color:var(--accent);font-weight:700;}
 
-  .result-box { display: none; margin-top: 20px; border-radius: 12px; padding: 20px; border: 1px solid rgba(0,229,160,0.3); background: rgba(0,229,160,0.05); }
-  .result-box.show { display: block; }
-  .result-box.error-box { border-color: rgba(255,59,92,0.3); background: rgba(255,59,92,0.05); }
-  .result-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; }
-  .result-title.err { color: var(--del); }
-  .result-row { display: flex; gap: 8px; margin-bottom: 6px; }
-  .result-key { color: var(--muted); min-width: 100px; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
-  .result-val { color: var(--code); font-family: 'JetBrains Mono', monospace; font-size: 12px; word-break: break-all; }
-  .result-val.accent { color: var(--accent); font-weight: 700; }
+  .btn-reset{margin-top:14px;padding:9px 18px;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;font-size:14px;transition:all 0.15s;}
+  .btn-reset:hover{background:var(--surface2);}
 
-  .btn-reset {
-    margin-top: 16px; padding: 10px 20px; background: rgba(255,255,255,0.05);
-    border: 1px solid var(--border); color: var(--text); border-radius: 8px;
-    cursor: pointer; font-family: 'Syne', sans-serif; font-weight: 600; font-size: 14px; transition: all 0.15s;
-  }
-  .btn-reset:hover { background: rgba(255,255,255,0.1); }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(0,0,0,0.3); border-top-color: #000; border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;}
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">API <span>TEST</span> SERVER</div>
-  <div class="nav-links">
-    <a href="/" class="nav-link">← Top</a>
-    <a href="/webhook.html" class="nav-link">Webhook V1</a>
-    <a href="/webhookv2.html" class="nav-link">Webhook V2</a>
-    <span class="nav-current">Upload</span>
-  </div>
+  <div class="logo"><div class="logo-dot"></div>API Test Server</div>
+  <nav class="nav">
+    <a href="/" class="nav-link" data-en="← Top" data-ja="← トップ">← Top</a>
+    <span class="nav-link nav-active" data-en="Upload" data-ja="アップロード">Upload</span>
+    <a href="/webhook.html" class="nav-link" data-en="Webhook V1" data-ja="Webhook V1">Webhook V1</a>
+    <a href="/webhookv2.html" class="nav-link" data-en="Webhook V2" data-ja="Webhook V2">Webhook V2</a>
+    <div class="lang-toggle">
+      <button class="lang-btn active" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" onclick="setLang('ja')">JP</button>
+    </div>
+  </nav>
 </header>
 
 <div class="page">
-  <h1>FILE <span>UPLOAD</span> <span class="ver-badge-header">v1.7</span></h1>
-  <div class="subtitle">ローカルファイルを選択して FileAI にアップロードします</div>
+  <div class="page-header">
+    <h1 data-en="File Upload" data-ja="ファイルアップロード">File Upload</h1>
+    <p data-en="Select a local file and upload it to FileAI." data-ja="ローカルファイルを選択して FileAI にアップロードします。">Select a local file and upload it to FileAI.</p>
+  </div>
 
   <div class="dropzone" id="dropzone">
     <input type="file" id="file-input">
     <div class="drop-icon">📂</div>
-    <div class="drop-title">ファイルをドロップ、またはクリックして選択</div>
-    <div class="drop-sub">PDF、画像、Excel など各種ファイルに対応</div>
+    <div class="drop-title" data-en="Drop a file here, or click to select" data-ja="ファイルをドロップ、またはクリックして選択">Drop a file here, or click to select</div>
+    <div class="drop-sub" data-en="Supports PDF, images, Excel and more" data-ja="PDF、画像、Excel など各種ファイルに対応">Supports PDF, images, Excel and more</div>
   </div>
 
   <div class="file-info" id="file-info">
@@ -142,12 +130,12 @@
   </div>
 
   <button class="btn-upload" id="btn-upload" disabled onclick="startUpload()">
-    ファイルを選択してください
+    <span data-en="Select a file to continue" data-ja="ファイルを選択してください">Select a file to continue</span>
   </button>
 
   <div class="progress-wrap" id="progress-wrap">
     <div class="progress-label">
-      <span id="progress-label-text">アップロード中...</span>
+      <span id="progress-label-text" data-en="Uploading..." data-ja="アップロード中...">Uploading...</span>
       <span id="progress-pct">0%</span>
     </div>
     <div class="progress-bar-bg"><div class="progress-bar" id="progress-bar"></div></div>
@@ -156,34 +144,31 @@
   <div class="steps" id="steps" style="display:none;">
     <div class="step pending" id="step1">
       <span class="step-icon">🔑</span>
-      <span class="step-label">STEP 1 — サーバー経由で Presigned URL を取得</span>
-      <span class="step-status" id="step1-status">待機中</span>
+      <span class="step-label" data-en="STEP 1 — Get Presigned URL via server" data-ja="STEP 1 — サーバー経由で Presigned URL を取得">STEP 1 — Get Presigned URL via server</span>
+      <span class="step-status" id="step1-status" data-en="Waiting" data-ja="待機中">Waiting</span>
     </div>
     <div class="step pending" id="step2">
       <span class="step-icon">📤</span>
-      <span class="step-label">STEP 2 — FileAI ストレージへアップロード</span>
-      <span class="step-status" id="step2-status">待機中</span>
+      <span class="step-label" data-en="STEP 2 — Upload to FileAI storage" data-ja="STEP 2 — FileAI ストレージへアップロード">STEP 2 — Upload to FileAI storage</span>
+      <span class="step-status" id="step2-status" data-en="Waiting" data-ja="待機中">Waiting</span>
     </div>
   </div>
 
   <div class="result-box" id="result-box">
-    <div class="result-title" id="result-title">✅ アップロード完了</div>
+    <div class="result-title" id="result-title" data-en="✅ Upload complete" data-ja="✅ アップロード完了">✅ Upload complete</div>
     <div class="result-row"><span class="result-key">uploadId</span><span class="result-val accent" id="res-uploadId">—</span></div>
     <div class="result-row"><span class="result-key">fileName</span><span class="result-val" id="res-fileName">—</span></div>
     <div class="result-row"><span class="result-key">fileType</span><span class="result-val" id="res-fileType">—</span></div>
-    <button class="btn-reset" onclick="resetAll()">別のファイルをアップロード</button>
+    <button class="btn-reset" onclick="resetAll()" data-en="Upload another file" data-ja="別のファイルをアップロード">Upload another file</button>
   </div>
 </div>
 
 <script>
   let selectedFile = null;
-
   const fileInput = document.getElementById('file-input');
   const dropzone  = document.getElementById('dropzone');
 
-  fileInput.addEventListener('change', () => {
-    if (fileInput.files[0]) handleFileSelect(fileInput.files[0]);
-  });
+  fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFileSelect(fileInput.files[0]); });
   dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
   dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
   dropzone.addEventListener('drop', e => {
@@ -191,150 +176,114 @@
     if (e.dataTransfer.files[0]) handleFileSelect(e.dataTransfer.files[0]);
   });
 
-  function getFileIcon(type) {
-    if (type.includes('pdf'))   return '📕';
-    if (type.includes('image')) return '🖼️';
-    if (type.includes('excel') || type.includes('spreadsheet')) return '📊';
-    if (type.includes('word')  || type.includes('document'))    return '📝';
+  function getFileIcon(type){
+    if(type.includes('pdf')) return '📕';
+    if(type.includes('image')) return '🖼️';
+    if(type.includes('excel')||type.includes('spreadsheet')) return '📊';
+    if(type.includes('word')||type.includes('document')) return '📝';
     return '📄';
   }
-  function formatSize(b) {
-    if (b < 1024) return b + ' B';
-    if (b < 1024*1024) return (b/1024).toFixed(1) + ' KB';
-    return (b/1024/1024).toFixed(2) + ' MB';
+  function formatSize(b){
+    if(b<1024) return b+' B';
+    if(b<1024*1024) return (b/1024).toFixed(1)+' KB';
+    return (b/1024/1024).toFixed(2)+' MB';
   }
 
-  function handleFileSelect(file) {
+  function handleFileSelect(file){
+    const lang = localStorage.getItem('lang')||'en';
     selectedFile = file;
     document.getElementById('file-info').classList.add('show');
     document.getElementById('file-icon').textContent = getFileIcon(file.type);
     document.getElementById('file-name').textContent = file.name;
-    document.getElementById('file-meta').textContent = `${file.type || '不明'} · ${formatSize(file.size)}`;
+    document.getElementById('file-meta').textContent = `${file.type||'unknown'} · ${formatSize(file.size)}`;
     const btn = document.getElementById('btn-upload');
     btn.disabled = false;
-    btn.innerHTML = '📤 アップロード開始';
+    btn.innerHTML = lang==='ja' ? '📤 アップロード開始' : '📤 Start Upload';
   }
 
-  function resetFile() {
+  function resetFile(){
+    const lang = localStorage.getItem('lang')||'en';
     selectedFile = null; fileInput.value = '';
     document.getElementById('file-info').classList.remove('show');
     const btn = document.getElementById('btn-upload');
     btn.disabled = true;
-    btn.innerHTML = 'ファイルを選択してください';
+    btn.innerHTML = lang==='ja' ? 'ファイルを選択してください' : 'Select a file to continue';
   }
 
-  async function startUpload() {
+  async function startUpload(){
     if (!selectedFile) return;
-
+    const lang = localStorage.getItem('lang')||'en';
     document.getElementById('btn-upload').disabled = true;
-    document.getElementById('btn-upload').innerHTML = '<span class="spinner"></span> 処理中...';
+    document.getElementById('btn-upload').innerHTML = '<span class="spinner"></span>';
     document.getElementById('steps').style.display = 'flex';
-    document.getElementById('result-box').classList.remove('show', 'error-box');
+    document.getElementById('result-box').classList.remove('show','error-box');
     document.getElementById('progress-wrap').classList.remove('show');
-    setStep(1, 'active', '取得中...');
-    setStep(2, 'pending', '待機中');
-
+    setStep(1,'active', lang==='ja'?'取得中...':'Fetching...');
+    setStep(2,'pending', lang==='ja'?'待機中':'Waiting');
     try {
-      // ── STEP 1: サーバー経由でPresigned URLを取得 ──
-      const metaRes = await fetch('/proxy/upload/init', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fileName: selectedFile.name,
-          fileType: selectedFile.type || 'application/octet-stream'
-        })
-      });
+      const metaRes = await fetch('/proxy/upload/init',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fileName:selectedFile.name,fileType:selectedFile.type||'application/octet-stream'})});
       const metaJson = await metaRes.json();
-      if (!metaRes.ok || !metaJson.success) {
-        throw new Error(metaJson.message || 'Presigned URL取得失敗');
-      }
-      const { presignedUploadURL, uploadId } = metaJson.data;
-      setStep(1, 'done', '取得完了');
-
-      // ── STEP 2: サーバー経由でS3にアップロード ──
-      setStep(2, 'active', 'アップロード中...');
+      if (!metaRes.ok||!metaJson.success) throw new Error(metaJson.message||(lang==='ja'?'Presigned URL取得失敗':'Failed to get Presigned URL'));
+      const {presignedUploadURL, uploadId} = metaJson.data;
+      setStep(1,'done', lang==='ja'?'取得完了':'Done');
+      setStep(2,'active', lang==='ja'?'アップロード中...':'Uploading...');
       document.getElementById('progress-wrap').classList.add('show');
       await uploadViaProxy(presignedUploadURL, selectedFile, metaJson.data.fileType);
-      setStep(2, 'done', '完了');
-      setProgress(100, 'アップロード完了');
-
-      // 結果表示
+      setStep(2,'done', lang==='ja'?'完了':'Done');
+      setProgress(100, lang==='ja'?'アップロード完了':'Upload complete');
       const box = document.getElementById('result-box');
       box.classList.add('show'); box.classList.remove('error-box');
-      document.getElementById('result-title').textContent = '✅ アップロード完了';
+      document.getElementById('result-title').textContent = lang==='ja'?'✅ アップロード完了':'✅ Upload complete';
       document.getElementById('result-title').className = 'result-title';
-      document.getElementById('res-uploadId').textContent = uploadId || '—';
+      document.getElementById('res-uploadId').textContent = uploadId||'—';
       document.getElementById('res-fileName').textContent = selectedFile.name;
-      document.getElementById('res-fileType').textContent = selectedFile.type || 'application/octet-stream';
-      document.getElementById('btn-upload').innerHTML = '✅ 完了';
-
-    } catch (err) {
-      console.error(err);
-      document.querySelectorAll('.step.active').forEach(s => {
-        s.classList.replace('active', 'error');
-        s.querySelector('.step-status').textContent = 'エラー';
-      });
+      document.getElementById('res-fileType').textContent = selectedFile.type||'application/octet-stream';
+      document.getElementById('btn-upload').innerHTML = '✅';
+    } catch(err){
+      document.querySelectorAll('.step.active').forEach(s=>{ s.classList.replace('active','error'); s.querySelector('.step-status').textContent=lang==='ja'?'エラー':'Error'; });
       const box = document.getElementById('result-box');
-      box.classList.add('show', 'error-box');
-      document.getElementById('result-title').textContent = '❌ エラーが発生しました';
+      box.classList.add('show','error-box');
+      document.getElementById('result-title').textContent = lang==='ja'?'❌ エラーが発生しました':'❌ An error occurred';
       document.getElementById('result-title').className = 'result-title err';
       document.getElementById('res-uploadId').textContent = '—';
       document.getElementById('res-fileName').textContent = err.message;
       document.getElementById('res-fileType').textContent = '—';
       document.getElementById('btn-upload').disabled = false;
-      document.getElementById('btn-upload').innerHTML = '↺ 再試行';
+      document.getElementById('btn-upload').innerHTML = lang==='ja'?'↺ 再試行':'↺ Retry';
     }
   }
 
-  // STEP2: FormDataでサーバーに送信 → サーバーがS3にPUT
-  async function uploadViaProxy(presignedUploadURL, file, fileType) {
+  async function uploadViaProxy(presignedUploadURL, file, fileType){
     const formData = new FormData();
     formData.append('file', file);
     formData.append('presignedUploadURL', presignedUploadURL);
-    formData.append('fileType', fileType || file.type || 'application/octet-stream');
-
-    // プログレスはXHRで取得
-    return new Promise((resolve, reject) => {
+    formData.append('fileType', fileType||file.type||'application/octet-stream');
+    return new Promise((resolve,reject)=>{
       const xhr = new XMLHttpRequest();
-      xhr.open('POST', '/proxy/upload/put');
-      xhr.upload.addEventListener('progress', e => {
-        if (e.lengthComputable) {
-          const pct = Math.round(e.loaded / e.total * 100);
-          setProgress(pct, `${formatSize(e.loaded)} / ${formatSize(e.total)}`);
-        }
+      xhr.open('POST','/proxy/upload/put');
+      xhr.upload.addEventListener('progress',e=>{
+        if(e.lengthComputable){ const pct=Math.round(e.loaded/e.total*100); setProgress(pct,`${formatSize(e.loaded)} / ${formatSize(e.total)}`); }
       });
-      xhr.addEventListener('load', () => {
-        try {
-          const result = JSON.parse(xhr.responseText);
-          if (xhr.status >= 200 && xhr.status < 300 && result.success) {
-            resolve(result);
-          } else {
-            reject(new Error(result.message || `アップロード失敗 (${xhr.status})`));
-          }
-        } catch {
-          reject(new Error(`レスポンス解析エラー (${xhr.status})`));
-        }
+      xhr.addEventListener('load',()=>{
+        try{ const r=JSON.parse(xhr.responseText); if(xhr.status>=200&&xhr.status<300&&r.success){resolve(r);}else{reject(new Error(r.message||`Upload failed (${xhr.status})`));} }
+        catch{ reject(new Error(`Parse error (${xhr.status})`)); }
       });
-      xhr.addEventListener('error', () => reject(new Error('ネットワークエラー')));
+      xhr.addEventListener('error',()=>reject(new Error('Network error')));
       xhr.send(formData);
     });
   }
 
-  function setStep(n, state, text) {
-    document.getElementById('step'+n).className = 'step ' + state;
-    document.getElementById('step'+n+'-status').textContent = text;
+  function setStep(n,state,text){ document.getElementById('step'+n).className='step '+state; document.getElementById('step'+n+'-status').textContent=text; }
+  function setProgress(pct,label){ document.getElementById('progress-bar').style.width=pct+'%'; document.getElementById('progress-pct').textContent=pct+'%'; document.getElementById('progress-label-text').textContent=label; }
+  function resetAll(){ resetFile(); document.getElementById('steps').style.display='none'; document.getElementById('result-box').classList.remove('show','error-box'); document.getElementById('progress-wrap').classList.remove('show'); }
+
+  function setLang(lang){
+    localStorage.setItem('lang',lang);
+    document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.textContent.toLowerCase()===lang));
+    document.querySelectorAll('[data-en]').forEach(el=>{ el.textContent=el.dataset[lang]||el.dataset.en; });
+    document.documentElement.lang=lang==='ja'?'ja':'en';
   }
-  function setProgress(pct, label) {
-    document.getElementById('progress-bar').style.width = pct + '%';
-    document.getElementById('progress-pct').textContent = pct + '%';
-    document.getElementById('progress-label-text').textContent = label;
-  }
-  function resetAll() {
-    resetFile();
-    document.getElementById('steps').style.display = 'none';
-    document.getElementById('result-box').classList.remove('show', 'error-box');
-    document.getElementById('progress-wrap').classList.remove('show');
-  }
+  (function(){ setLang(localStorage.getItem('lang')||'en'); })();
 </script>
 </body>
 </html>

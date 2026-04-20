@@ -1,357 +1,220 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Webhook Viewer v1.3</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<title>Webhook V1 Viewer</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0a0c0f;
-    --panel: #111418;
-    --border: #1e2530;
-    --accent: #00e5a0;
-    --del: #ff3b5c;
-    --text: #e2e8f0;
-    --muted: #4a5568;
-    --code: #a8b8cc;
-    --post: #0066ff;
+  :root{
+    --bg:#f0f4f8;--surface:#ffffff;--surface2:#f8fafc;--border:#e2e8f0;
+    --text:#1e293b;--muted:#64748b;--subtle:#94a3b8;
+    --accent:#2563eb;--accent-bg:#eff6ff;--accent-border:#bfdbfe;
+    --green:#059669;--green-bg:#ecfdf5;--green-border:#a7f3d0;
+    --red:#dc2626;--red-bg:#fef2f2;--red-border:#fecaca;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; min-height: 100vh; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;}
+  header{background:var(--surface);border-bottom:1px solid var(--border);padding:13px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;box-shadow:0 1px 3px rgba(0,0,0,0.06);}
+  .logo{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;}
+  .logo-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:blink 2s infinite;}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+  .nav{display:flex;align-items:center;gap:6px;}
+  .nav-link{font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:5px 13px;border-radius:7px;border:1px solid var(--border);transition:all 0.15s;}
+  .nav-link:hover{color:var(--accent);border-color:var(--accent-border);background:var(--accent-bg);}
+  .nav-active{color:var(--accent);border-color:var(--accent-border);background:var(--accent-bg);}
+  .lang-toggle{display:flex;border:1px solid var(--border);border-radius:7px;overflow:hidden;margin-left:6px;}
+  .lang-btn{padding:5px 11px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted);transition:all 0.15s;font-family:'Inter',sans-serif;}
+  .lang-btn.active{background:var(--accent);color:#fff;}
+  .lang-btn:hover:not(.active){background:var(--surface2);}
 
-  header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 16px 32px; border-bottom: 1px solid var(--border);
-    background: var(--panel);
-  }
-  .logo { font-size: 18px; font-weight: 800; }
-  .logo span { color: var(--accent); }
-  .nav-link {
-    font-size: 13px; color: var(--muted); text-decoration: none;
-    padding: 6px 14px; border: 1px solid var(--border); border-radius: 6px;
-    transition: all 0.15s;
-  }
-  .nav-link:hover { color: var(--text); border-color: var(--accent); }
-  .nav-current { font-size:13px; color:var(--accent); padding:6px 14px; border:1px solid rgba(0,229,160,0.3); border-radius:6px; font-weight:700; }
-  .ver-badge-header { font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:var(--accent); background:rgba(0,229,160,0.1); border:1px solid rgba(0,229,160,0.25); padding:2px 10px; border-radius:20px; margin-left:8px; vertical-align:middle; }
+  .hero{background:var(--surface);border-bottom:1px solid var(--border);padding:26px 28px;}
+  .hero-top{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px;}
+  .hero-title{font-size:21px;font-weight:700;}
+  .hero-sub{font-size:13px;color:var(--muted);margin-top:3px;}
+  .auto-label{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;}
+  .dot-live{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 2s infinite;display:inline-block;}
 
-  .hero {
-    background: var(--panel); border-bottom: 1px solid var(--border);
-    padding: 28px 32px;
-  }
-  .hero-top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
-  .hero-title { font-size: 22px; font-weight: 800; }
-  .hero-title span { color: var(--accent); }
+  .endpoint-box{display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 15px;flex-wrap:wrap;margin-bottom:18px;}
+  .badge-post{background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent-border);font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;}
+  .ep-url{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);flex:1;word-break:break-all;}
+  .copy-btn{background:var(--accent);color:#fff;border:none;padding:6px 14px;border-radius:7px;cursor:pointer;font-size:12px;font-weight:600;font-family:'Inter',sans-serif;transition:all 0.15s;white-space:nowrap;}
+  .copy-btn:hover{background:#1d4ed8;}
 
-  .endpoint-box {
-    display: flex; align-items: center; gap: 10px; margin-top: 16px;
-    background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
-    padding: 12px 16px; flex-wrap: wrap;
-  }
-  .badge-post {
-    background: rgba(0,102,255,0.2); color: var(--post);
-    font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700;
-    padding: 3px 8px; border-radius: 4px;
-  }
-  .endpoint-url {
-    font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--accent);
-    flex: 1; word-break: break-all;
-  }
-  .copy-btn {
-    background: rgba(0,229,160,0.1); border: 1px solid rgba(0,229,160,0.3);
-    color: var(--accent); padding: 5px 12px; border-radius: 6px; cursor: pointer;
-    font-size: 12px; font-family: 'Syne', sans-serif; font-weight: 600;
-    transition: all 0.15s; white-space: nowrap;
-  }
-  .copy-btn:hover { background: rgba(0,229,160,0.2); }
+  .stats{display:flex;gap:14px;flex-wrap:wrap;}
+  .stat-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:13px 18px;min-width:130px;}
+  .stat-val{font-size:26px;font-weight:700;color:var(--accent);font-family:'JetBrains Mono',monospace;}
+  .stat-label{font-size:12px;color:var(--muted);margin-top:2px;}
 
-  .stats-bar {
-    display: flex; gap: 24px; margin-top: 16px; flex-wrap: wrap;
-  }
-  .stat { display: flex; flex-direction: column; }
-  .stat-val { font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 700; color: var(--accent); }
-  .stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .toolbar{display:flex;align-items:center;justify-content:space-between;padding:13px 28px;flex-wrap:wrap;gap:10px;background:var(--surface);border-bottom:1px solid var(--border);}
+  .section-label{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--subtle);}
+  .btn-row{display:flex;gap:8px;}
+  .btn{padding:7px 15px;border-radius:8px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;font-size:13px;transition:all 0.15s;display:inline-flex;align-items:center;gap:5px;border:1px solid;}
+  .btn-refresh{background:var(--surface);color:var(--accent);border-color:var(--accent-border);}
+  .btn-refresh:hover{background:var(--accent-bg);}
+  .btn-clear{background:var(--surface);color:var(--red);border-color:var(--red-border);}
+  .btn-clear:hover{background:var(--red-bg);}
 
-  .toolbar {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 16px 32px; flex-wrap: wrap; gap: 12px;
-  }
-  .toolbar-left { display: flex; align-items: center; gap: 10px; }
-  .section-label { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+  .content{padding:18px 28px 60px;}
+  .log-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden;transition:box-shadow 0.15s;}
+  .log-card:hover{box-shadow:0 2px 12px rgba(0,0,0,0.07);}
+  .log-card-header{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;user-select:none;}
+  .log-card-header:hover{background:var(--surface2);}
+  .log-num{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;background:var(--accent-bg);color:var(--accent);padding:2px 8px;border-radius:6px;border:1px solid var(--accent-border);}
+  .log-time{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);white-space:nowrap;}
+  .log-preview{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text);flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+  .toggle{color:var(--subtle);font-size:11px;transition:transform 0.2s;}
+  .toggle.open{transform:rotate(180deg);}
+  .log-card-body{display:none;border-top:1px solid var(--border);padding:15px 16px;}
+  .log-card-body.open{display:block;}
+  .json-block{background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:13px 15px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;white-space:pre-wrap;word-break:break-all;color:#334155;max-height:400px;overflow-y:auto;}
+  .json-block .key{color:#1e40af;}.json-block .string{color:#166534;}.json-block .number{color:#9a3412;}.json-block .bool{color:#6d28d9;}.json-block .null{color:var(--subtle);}
+  .empty{color:var(--muted);font-size:14px;text-align:center;padding:60px;background:var(--surface);border:2px dashed var(--border);border-radius:12px;}
 
-  .btn {
-    padding: 9px 18px; border: none; border-radius: 8px; cursor: pointer;
-    font-family: 'Syne', sans-serif; font-weight: 600; font-size: 13px;
-    transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px;
-  }
-  .btn-refresh { background: rgba(0,229,160,0.1); color: var(--accent); border: 1px solid rgba(0,229,160,0.25); }
-  .btn-refresh:hover { background: rgba(0,229,160,0.2); }
-  .btn-clear { background: rgba(255,59,92,0.1); color: var(--del); border: 1px solid rgba(255,59,92,0.25); }
-  .btn-clear:hover { background: rgba(255,59,92,0.2); }
-
-  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; animation: pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
-  .content { padding: 0 32px 32px; }
-
-  /* Log cards */
-  .log-card {
-    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
-    margin-bottom: 12px; overflow: hidden;
-    animation: fadeIn 0.3s ease;
-  }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
-
-  .log-card-header {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px 16px; border-bottom: 1px solid var(--border);
-    cursor: pointer; user-select: none;
-  }
-  .log-card-header:hover { background: rgba(255,255,255,0.02); }
-  .log-index {
-    font-family: 'JetBrains Mono', monospace; font-size: 11px;
-    background: rgba(0,229,160,0.1); color: var(--accent);
-    padding: 2px 8px; border-radius: 4px; font-weight: 700;
-  }
-  .log-time {
-    font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted);
-  }
-  .log-preview {
-    font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--code);
-    flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
-  }
-  .toggle-icon { color: var(--muted); font-size: 12px; transition: transform 0.2s; }
-  .toggle-icon.open { transform: rotate(180deg); }
-
-  .log-card-body {
-    display: none; padding: 16px;
-  }
-  .log-card-body.open { display: block; }
-
-  .json-block {
-    background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
-    padding: 14px 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px;
-    line-height: 1.7; white-space: pre-wrap; word-break: break-all; color: var(--code);
-    max-height: 400px; overflow-y: auto;
-  }
-  .json-block .key { color: #7dd3fc; }
-  .json-block .string { color: #86efac; }
-  .json-block .number { color: #fca5a5; }
-  .json-block .bool { color: #f0abfc; }
-  .json-block .null { color: var(--muted); }
-
-  .empty { color: var(--muted); font-size: 14px; text-align: center; padding: 60px; border: 1px dashed var(--border); border-radius: 12px; }
-
-  /* Modal */
-  .modal-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.7); z-index: 100;
-    align-items: center; justify-content: center;
-  }
-  .modal-overlay.show { display: flex; }
-  .modal {
-    background: var(--panel); border: 1px solid var(--border);
-    border-radius: 14px; padding: 28px; max-width: 400px; width: 90%;
-  }
-  .modal h3 { font-size: 18px; margin-bottom: 10px; }
-  .modal p { font-size: 14px; color: var(--muted); margin-bottom: 24px; line-height: 1.6; }
-  .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
-  .btn-cancel { background: rgba(255,255,255,0.05); color: var(--text); border: 1px solid var(--border); }
-  .btn-cancel:hover { background: rgba(255,255,255,0.1); }
-  .btn-confirm-del { background: var(--del); color: #fff; }
-  .btn-confirm-del:hover { filter: brightness(1.15); }
-
-  .toast {
-    position: fixed; bottom: 24px; right: 24px;
-    background: var(--panel); border: 1px solid var(--accent);
-    color: var(--accent); padding: 12px 20px; border-radius: 10px;
-    font-size: 13px; font-family: 'JetBrains Mono', monospace;
-    opacity: 0; transform: translateY(10px);
-    transition: all 0.3s; pointer-events: none; z-index: 200;
-  }
-  .toast.show { opacity: 1; transform: translateY(0); }
-
-  .auto-badge {
-    font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace;
-    display: flex; align-items: center; gap: 6px;
-  }
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:100;align-items:center;justify-content:center;}
+  .modal-overlay.show{display:flex;}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:26px;max-width:400px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.15);}
+  .modal h3{font-size:17px;font-weight:700;margin-bottom:10px;}
+  .modal p{font-size:14px;color:var(--muted);margin-bottom:22px;line-height:1.6;}
+  .modal-btns{display:flex;gap:10px;justify-content:flex-end;}
+  .btn-cancel{background:var(--surface);color:var(--muted);border:1px solid var(--border);border-radius:8px;padding:7px 15px;cursor:pointer;font-weight:600;font-size:13px;font-family:'Inter',sans-serif;}
+  .btn-cancel:hover{background:var(--surface2);}
+  .btn-danger{background:var(--red);color:#fff;border:none;border-radius:8px;padding:7px 15px;cursor:pointer;font-weight:600;font-size:13px;font-family:'Inter',sans-serif;}
+  .btn-danger:hover{background:#b91c1c;}
+  .toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:#fff;padding:11px 18px;border-radius:10px;font-size:13px;opacity:0;transform:translateY(10px);transition:all 0.3s;pointer-events:none;z-index:200;}
+  .toast.show{opacity:1;transform:translateY(0);}
 </style>
 </head>
 <body>
-
 <header>
-  <div class="logo">API <span>TEST</span> SERVER</div>
-  <div class="nav-links" style="display:flex;gap:8px;align-items:center;">
-    <a href="/" class="nav-link">← Top</a>
-    <a href="/upload.html" class="nav-link">Upload</a>
-    <span class="nav-current">Webhook V1</span>
-    <a href="/webhookv2.html" class="nav-link">Webhook V2</a>
-  </div>
+  <div class="logo"><div class="logo-dot"></div>API Test Server</div>
+  <nav class="nav">
+    <a href="/" class="nav-link" data-en="← Top" data-ja="← トップ">← Top</a>
+    <a href="/upload.html" class="nav-link" data-en="Upload" data-ja="アップロード">Upload</a>
+    <span class="nav-link nav-active" data-en="Webhook V1" data-ja="Webhook V1">Webhook V1</span>
+    <a href="/webhookv2.html" class="nav-link" data-en="Webhook V2" data-ja="Webhook V2">Webhook V2</a>
+    <div class="lang-toggle">
+      <button class="lang-btn active" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" onclick="setLang('ja')">JP</button>
+    </div>
+  </nav>
 </header>
 
 <div class="hero">
   <div class="hero-top">
     <div>
-      <div class="hero-title">WEBHOOK <span>VIEWER</span> <span class="ver-badge-header">v1.3</span></div>
-      <div style="font-size:13px; color:var(--muted); margin-top:4px;">FileAIから送られたWebhookを受信・記録・表示します</div>
+      <div class="hero-title" data-en="Webhook Viewer V1" data-ja="Webhook ビューワー V1">Webhook Viewer V1</div>
+      <div class="hero-sub" data-en="Receives, records and displays all Webhooks sent from FileAI." data-ja="FileAIから送られたWebhookを受信・記録・表示します。">Receives, records and displays all Webhooks sent from FileAI.</div>
     </div>
-    <div class="auto-badge">
-      <div class="dot"></div>
-      <span id="auto-label">30秒ごとに自動更新</span>
-    </div>
+    <div class="auto-label"><span class="dot-live"></span><span data-en="Auto-refresh every 30s" data-ja="30秒ごとに自動更新">Auto-refresh every 30s</span></div>
   </div>
-
   <div class="endpoint-box">
     <span class="badge-post">POST</span>
-    <span class="endpoint-url" id="webhook-url">読み込み中...</span>
-    <button class="copy-btn" onclick="copyUrl()">📋 コピー</button>
+    <span class="ep-url" id="webhook-url">loading...</span>
+    <button class="copy-btn" onclick="copyUrl()" data-en="Copy URL" data-ja="URLをコピー">Copy URL</button>
   </div>
-
-  <div class="stats-bar">
-    <div class="stat">
-      <span class="stat-val" id="stat-count">—</span>
-      <span class="stat-label">受信件数</span>
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-val" id="stat-count">—</div>
+      <div class="stat-label" data-en="Total received" data-ja="受信件数">Total received</div>
     </div>
-    <div class="stat">
-      <span class="stat-val" id="stat-latest">—</span>
-      <span class="stat-label">最終受信</span>
+    <div class="stat-card">
+      <div class="stat-val" id="stat-latest" style="font-size:15px;padding-top:6px;">—</div>
+      <div class="stat-label" data-en="Last received" data-ja="最終受信">Last received</div>
     </div>
   </div>
 </div>
 
 <div class="toolbar">
-  <div class="toolbar-left">
-    <span class="section-label">受信ログ</span>
-  </div>
-  <div style="display:flex; gap:8px;">
-    <button class="btn btn-refresh" onclick="loadLogs()">↺ 更新</button>
-    <button class="btn btn-clear" onclick="showClearModal()">🗑 ログを空にする</button>
+  <span class="section-label" data-en="Received Logs" data-ja="受信ログ">Received Logs</span>
+  <div class="btn-row">
+    <button class="btn btn-refresh" onclick="loadLogs()" data-en="↺ Refresh" data-ja="↺ 更新">↺ Refresh</button>
+    <button class="btn btn-clear" onclick="showModal()" data-en="Clear Logs" data-ja="ログを空にする">Clear Logs</button>
   </div>
 </div>
 
 <div class="content">
-  <div id="logs-container">
-    <div class="empty">Webhookをまだ受信していません</div>
-  </div>
+  <div id="logs-container"><div class="empty" data-en="No Webhooks received yet." data-ja="Webhookをまだ受信していません。">No Webhooks received yet.</div></div>
 </div>
 
-<!-- 確認モーダル -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
-    <h3>ログを空にしますか？</h3>
-    <p>保存されているWebhookのデータをすべて削除します。<br>この操作は取り消せません。</p>
+    <h3 data-en="Clear all logs?" data-ja="ログを空にしますか？">Clear all logs?</h3>
+    <p data-en="All saved Webhook data will be permanently deleted. This cannot be undone." data-ja="保存されているWebhookデータをすべて削除します。この操作は取り消せません。">All saved Webhook data will be permanently deleted. This cannot be undone.</p>
     <div class="modal-btns">
-      <button class="btn btn-cancel" onclick="hideModal()">キャンセル</button>
-      <button class="btn btn-confirm-del" onclick="clearLogs()">削除する</button>
+      <button class="btn-cancel" onclick="hideModal()" data-en="Cancel" data-ja="キャンセル">Cancel</button>
+      <button class="btn-danger" onclick="clearLogs()" data-en="Delete" data-ja="削除する">Delete</button>
     </div>
   </div>
 </div>
-
-<!-- トースト通知 -->
 <div class="toast" id="toast"></div>
 
 <script>
-  // Webhookエンドポイントを表示
   const webhookUrl = window.location.origin + '/webhook';
   document.getElementById('webhook-url').textContent = webhookUrl;
 
   function highlight(json) {
-    return json
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    return json.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
       .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, m => {
-        let c = 'number';
-        if (/^"/.test(m)) c = /:$/.test(m) ? 'key' : 'string';
-        else if (/true|false/.test(m)) c = 'bool';
-        else if (/null/.test(m)) c = 'null';
+        let c='number';
+        if(/^"/.test(m)) c=/:$/.test(m)?'key':'string';
+        else if(/true|false/.test(m)) c='bool';
+        else if(/null/.test(m)) c='null';
         return `<span class="${c}">${m}</span>`;
       });
   }
-
-  function formatTime(iso) {
-    return new Date(iso).toLocaleString('ja-JP', {
-      month: '2-digit', day: '2-digit',
-      hour: '2-digit', minute: '2-digit', second: '2-digit'
-    });
-  }
-
-  function getPreview(data) {
-    try {
-      const s = JSON.stringify(data);
-      return s.length > 80 ? s.slice(0, 80) + '...' : s;
-    } catch { return '—'; }
-  }
-
-  function toggleCard(id) {
-    const body = document.getElementById('body-' + id);
-    const icon = document.getElementById('icon-' + id);
-    body.classList.toggle('open');
-    icon.classList.toggle('open');
-  }
+  function fmtTime(iso){ return new Date(iso).toLocaleString('ja-JP',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
+  function toggle(i){ document.getElementById('body-'+i).classList.toggle('open'); document.getElementById('icon-'+i).classList.toggle('open'); }
 
   async function loadLogs() {
-    try {
-      const res = await fetch('/webhook/logs');
-      const d = await res.json();
-      const logs = d.data || [];
-
-      document.getElementById('stat-count').textContent = logs.length;
-      document.getElementById('stat-latest').textContent =
-        logs.length ? formatTime(logs[0].receivedAt) : '—';
-
-      const container = document.getElementById('logs-container');
-      if (!logs.length) {
-        container.innerHTML = '<div class="empty">Webhookをまだ受信していません</div>';
-        return;
-      }
-
-      container.innerHTML = logs.map((log, i) => {
-        const idx = logs.length - i;
-        const preview = getPreview(log.data);
-        const jsonStr = JSON.stringify(log.data, null, 2);
-        return `
-          <div class="log-card">
-            <div class="log-card-header" onclick="toggleCard(${i})">
-              <span class="log-index">#${idx}</span>
-              <span class="log-time">${formatTime(log.receivedAt)}</span>
-              <span class="log-preview">${preview}</span>
-              <span class="toggle-icon" id="icon-${i}">▼</span>
-            </div>
-            <div class="log-card-body" id="body-${i}">
-              <div class="json-block">${highlight(jsonStr)}</div>
-            </div>
-          </div>`;
-      }).join('');
-    } catch(e) {
-      console.error(e);
+    const lang = localStorage.getItem('lang') || 'en';
+    const res = await fetch('/webhook/logs');
+    const d = await res.json();
+    const logs = d.data || [];
+    document.getElementById('stat-count').textContent = logs.length;
+    document.getElementById('stat-latest').textContent = logs.length ? fmtTime(logs[0].receivedAt) : '—';
+    const c = document.getElementById('logs-container');
+    if (!logs.length) {
+      c.innerHTML = `<div class="empty" data-en="No Webhooks received yet." data-ja="Webhookをまだ受信していません。">${lang==='ja'?'Webhookをまだ受信していません。':'No Webhooks received yet.'}</div>`;
+      return;
     }
+    c.innerHTML = logs.map((log, i) => {
+      const idx = logs.length - i;
+      const preview = JSON.stringify(log.data).slice(0, 90);
+      return `<div class="log-card">
+        <div class="log-card-header" onclick="toggle(${i})">
+          <span class="log-num">#${idx}</span>
+          <span class="log-time">${fmtTime(log.receivedAt)}</span>
+          <span class="log-preview">${preview}</span>
+          <span class="toggle" id="icon-${i}">▼</span>
+        </div>
+        <div class="log-card-body" id="body-${i}">
+          <div class="json-block">${highlight(JSON.stringify(log.data, null, 2))}</div>
+        </div>
+      </div>`;
+    }).join('');
   }
 
-  function showClearModal() { document.getElementById('modal').classList.add('show'); }
-  function hideModal() { document.getElementById('modal').classList.remove('show'); }
-
-  async function clearLogs() {
+  function showModal(){ document.getElementById('modal').classList.add('show'); }
+  function hideModal(){ document.getElementById('modal').classList.remove('show'); }
+  async function clearLogs(){
     hideModal();
-    await fetch('/webhook/logs', { method: 'DELETE' });
+    await fetch('/webhook/logs', {method:'DELETE'});
     await loadLogs();
-    showToast('ログを削除しました');
+    toast(localStorage.getItem('lang')==='ja' ? 'ログを削除しました' : 'Logs cleared');
   }
+  function copyUrl(){ navigator.clipboard.writeText(webhookUrl).then(()=>toast(localStorage.getItem('lang')==='ja'?'URLをコピーしました':'URL copied')); }
+  function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
 
-  function copyUrl() {
-    navigator.clipboard.writeText(webhookUrl).then(() => showToast('URLをコピーしました'));
+  function setLang(lang) {
+    localStorage.setItem('lang', lang);
+    document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active', b.textContent.toLowerCase()===lang));
+    document.querySelectorAll('[data-en]').forEach(el=>{ el.textContent=el.dataset[lang]||el.dataset.en; });
+    document.documentElement.lang = lang==='ja'?'ja':'en';
+    loadLogs();
   }
-
-  function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2500);
-  }
-
-  // 初回ロード
-  loadLogs();
-
+  (function(){ setLang(localStorage.getItem('lang')||'en'); })();
+  setInterval(loadLogs, 30000);
 </script>
 </body>
 </html>
