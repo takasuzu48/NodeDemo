@@ -167,7 +167,10 @@ app.post('/webhookv2', async (req, res) => {
 
     const apiRes = await fetch(apiUrl, {
       method: 'GET',
-      headers: { 'Content-Type': 'application/json' }
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': 'sk-l2BMqsi5V46OYUebgH7BfRY3xwRR5qbvDPd0EG8qbo3ic9AD'
+      }
     });
     fileApiResult = await apiRes.json();
     console.log('[webhookv2] FileAI API response status:', apiRes.status);
