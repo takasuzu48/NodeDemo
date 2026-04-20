@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Webhook Viewer v1.1</title>
+<title>Webhook Viewer v1.3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
@@ -34,6 +34,8 @@
     transition: all 0.15s;
   }
   .nav-link:hover { color: var(--text); border-color: var(--accent); }
+  .nav-current { font-size:13px; color:var(--accent); padding:6px 14px; border:1px solid rgba(0,229,160,0.3); border-radius:6px; font-weight:700; }
+  .ver-badge-header { font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:var(--accent); background:rgba(0,229,160,0.1); border:1px solid rgba(0,229,160,0.25); padding:2px 10px; border-radius:20px; margin-left:8px; vertical-align:middle; }
 
   .hero {
     background: var(--panel); border-bottom: 1px solid var(--border);
@@ -181,13 +183,18 @@
 
 <header>
   <div class="logo">API <span>TEST</span> SERVER</div>
-  <a href="/" class="nav-link">← ダッシュボードへ</a>
+  <div class="nav-links" style="display:flex;gap:8px;align-items:center;">
+    <a href="/" class="nav-link">← Top</a>
+    <a href="/upload.html" class="nav-link">Upload</a>
+    <span class="nav-current">Webhook V1</span>
+    <a href="/webhookv2.html" class="nav-link">Webhook V2</a>
+  </div>
 </header>
 
 <div class="hero">
   <div class="hero-top">
     <div>
-      <div class="hero-title">WEBHOOK <span>VIEWER</span></div>
+      <div class="hero-title">WEBHOOK <span>VIEWER</span> <span class="ver-badge-header">v1.3</span></div>
       <div style="font-size:13px; color:var(--muted); margin-top:4px;">FileAIから送られたWebhookを受信・記録・表示します</div>
     </div>
     <div class="auto-badge">
@@ -345,8 +352,6 @@
   // 初回ロード
   loadLogs();
 
-  // 30秒ごとに自動更新
-  setInterval(loadLogs, 30000);
 </script>
 </body>
 </html>
