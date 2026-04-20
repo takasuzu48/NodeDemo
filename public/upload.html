@@ -29,44 +29,30 @@
   .nav-link:hover { color: var(--text); border-color: var(--accent); }
 
   .page { max-width: 680px; margin: 48px auto; padding: 0 24px 60px; }
-
   h1 { font-size: 28px; font-weight: 800; margin-bottom: 6px; }
   h1 span { color: var(--accent); }
   .subtitle { font-size: 14px; color: var(--muted); margin-bottom: 36px; }
 
-  /* Drop zone */
   .dropzone {
     border: 2px dashed var(--border); border-radius: 16px;
     padding: 48px 24px; text-align: center; cursor: pointer;
     transition: all 0.2s; position: relative; background: var(--panel);
   }
-  .dropzone:hover, .dropzone.drag-over {
-    border-color: var(--accent); background: rgba(0,229,160,0.04);
-  }
-  .dropzone input[type=file] {
-    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
-  }
+  .dropzone:hover, .dropzone.drag-over { border-color: var(--accent); background: rgba(0,229,160,0.04); }
+  .dropzone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
   .drop-icon { font-size: 40px; margin-bottom: 12px; }
   .drop-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
   .drop-sub { font-size: 13px; color: var(--muted); }
 
-  /* Selected file info */
-  .file-info {
-    display: none; background: var(--panel); border: 1px solid var(--border);
-    border-radius: 12px; padding: 16px 20px; margin-top: 16px;
-  }
+  .file-info { display: none; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; margin-top: 16px; }
   .file-info.show { display: flex; align-items: center; gap: 16px; }
   .file-icon { font-size: 28px; }
   .file-details { flex: 1; }
   .file-name { font-weight: 700; font-size: 15px; word-break: break-all; }
   .file-meta { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); margin-top: 4px; }
-  .file-remove {
-    background: none; border: none; color: var(--muted); cursor: pointer;
-    font-size: 18px; padding: 4px; transition: color 0.15s;
-  }
+  .file-remove { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 18px; padding: 4px; transition: color 0.15s; }
   .file-remove:hover { color: var(--del); }
 
-  /* Upload button */
   .btn-upload {
     width: 100%; margin-top: 20px; padding: 16px;
     background: var(--accent); color: #000; border: none; border-radius: 12px;
@@ -76,23 +62,13 @@
   .btn-upload:hover:not(:disabled) { background: #00ffb3; transform: translateY(-1px); }
   .btn-upload:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; transform: none; }
 
-  /* Progress */
   .progress-wrap { display: none; margin-top: 20px; }
   .progress-wrap.show { display: block; }
-  .progress-label {
-    display: flex; justify-content: space-between;
-    font-size: 13px; color: var(--muted); margin-bottom: 8px;
-  }
+  .progress-label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); margin-bottom: 8px; }
   .progress-label span { font-family: 'JetBrains Mono', monospace; }
-  .progress-bar-bg {
-    height: 6px; background: var(--border); border-radius: 99px; overflow: hidden;
-  }
-  .progress-bar {
-    height: 100%; background: var(--accent); border-radius: 99px;
-    width: 0%; transition: width 0.3s;
-  }
+  .progress-bar-bg { height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; }
+  .progress-bar { height: 100%; background: var(--accent); border-radius: 99px; width: 0%; transition: width 0.3s; }
 
-  /* Steps */
   .steps { display: flex; flex-direction: column; gap: 8px; margin-top: 20px; }
   .step {
     display: flex; align-items: center; gap: 12px;
@@ -110,16 +86,12 @@
   .step.error { border-color: rgba(255,59,92,0.3); background: rgba(255,59,92,0.05); }
   .step.error .step-status { color: var(--del); }
 
-  /* Result */
-  .result-box {
-    display: none; margin-top: 20px; border-radius: 12px; padding: 20px;
-    border: 1px solid rgba(0,229,160,0.3); background: rgba(0,229,160,0.05);
-  }
+  .result-box { display: none; margin-top: 20px; border-radius: 12px; padding: 20px; border: 1px solid rgba(0,229,160,0.3); background: rgba(0,229,160,0.05); }
   .result-box.show { display: block; }
   .result-box.error-box { border-color: rgba(255,59,92,0.3); background: rgba(255,59,92,0.05); }
   .result-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; }
   .result-title.err { color: var(--del); }
-  .result-row { display: flex; gap: 8px; margin-bottom: 6px; font-size: 13px; }
+  .result-row { display: flex; gap: 8px; margin-bottom: 6px; }
   .result-key { color: var(--muted); min-width: 100px; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
   .result-val { color: var(--code); font-family: 'JetBrains Mono', monospace; font-size: 12px; word-break: break-all; }
   .result-val.accent { color: var(--accent); font-weight: 700; }
@@ -127,12 +99,10 @@
   .btn-reset {
     margin-top: 16px; padding: 10px 20px; background: rgba(255,255,255,0.05);
     border: 1px solid var(--border); color: var(--text); border-radius: 8px;
-    cursor: pointer; font-family: 'Syne', sans-serif; font-weight: 600; font-size: 14px;
-    transition: all 0.15s;
+    cursor: pointer; font-family: 'Syne', sans-serif; font-weight: 600; font-size: 14px; transition: all 0.15s;
   }
   .btn-reset:hover { background: rgba(255,255,255,0.1); }
 
-  /* Spinner */
   @keyframes spin { to { transform: rotate(360deg); } }
   .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(0,0,0,0.3); border-top-color: #000; border-radius: 50%; animation: spin 0.7s linear infinite; }
 </style>
@@ -151,7 +121,6 @@
   <h1>FILE <span>UPLOAD</span></h1>
   <div class="subtitle">ローカルファイルを選択して FileAI にアップロードします</div>
 
-  <!-- Drop zone -->
   <div class="dropzone" id="dropzone">
     <input type="file" id="file-input">
     <div class="drop-icon">📂</div>
@@ -159,47 +128,40 @@
     <div class="drop-sub">PDF、画像、Excel など各種ファイルに対応</div>
   </div>
 
-  <!-- Selected file info -->
   <div class="file-info" id="file-info">
     <div class="file-icon" id="file-icon">📄</div>
     <div class="file-details">
       <div class="file-name" id="file-name">—</div>
       <div class="file-meta" id="file-meta">—</div>
     </div>
-    <button class="file-remove" onclick="resetFile()" title="選択解除">✕</button>
+    <button class="file-remove" onclick="resetFile()">✕</button>
   </div>
 
-  <!-- Upload button -->
   <button class="btn-upload" id="btn-upload" disabled onclick="startUpload()">
     ファイルを選択してください
   </button>
 
-  <!-- Progress -->
   <div class="progress-wrap" id="progress-wrap">
     <div class="progress-label">
       <span id="progress-label-text">アップロード中...</span>
       <span id="progress-pct">0%</span>
     </div>
-    <div class="progress-bar-bg">
-      <div class="progress-bar" id="progress-bar"></div>
-    </div>
+    <div class="progress-bar-bg"><div class="progress-bar" id="progress-bar"></div></div>
   </div>
 
-  <!-- Steps -->
   <div class="steps" id="steps" style="display:none;">
     <div class="step pending" id="step1">
       <span class="step-icon">🔑</span>
-      <span class="step-label">STEP 1 — Presigned URL を取得</span>
+      <span class="step-label">STEP 1 — サーバー経由で Presigned URL を取得</span>
       <span class="step-status" id="step1-status">待機中</span>
     </div>
     <div class="step pending" id="step2">
       <span class="step-icon">📤</span>
-      <span class="step-label">STEP 2 — ファイルをアップロード</span>
+      <span class="step-label">STEP 2 — FileAI ストレージへアップロード</span>
       <span class="step-status" id="step2-status">待機中</span>
     </div>
   </div>
 
-  <!-- Result -->
   <div class="result-box" id="result-box">
     <div class="result-title" id="result-title">✅ アップロード完了</div>
     <div class="result-row"><span class="result-key">uploadId</span><span class="result-val accent" id="res-uploadId">—</span></div>
@@ -207,43 +169,35 @@
     <div class="result-row"><span class="result-key">fileType</span><span class="result-val" id="res-fileType">—</span></div>
     <button class="btn-reset" onclick="resetAll()">別のファイルをアップロード</button>
   </div>
-
 </div>
 
 <script>
-  const API_KEY = 'sk-l2BMqsi5V46OYUebgH7BfRY3xwRR5qbvDPd0EG8qbo3ic9AD';
-  const UPLOAD_ENDPOINT = 'https://api.orion.file.ai/prod/v1/files/upload';
-
   let selectedFile = null;
 
-  // ── ファイル選択 ────────────────────────────────────────
   const fileInput = document.getElementById('file-input');
   const dropzone  = document.getElementById('dropzone');
 
   fileInput.addEventListener('change', () => {
     if (fileInput.files[0]) handleFileSelect(fileInput.files[0]);
   });
-
   dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
   dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
   dropzone.addEventListener('drop', e => {
-    e.preventDefault();
-    dropzone.classList.remove('drag-over');
+    e.preventDefault(); dropzone.classList.remove('drag-over');
     if (e.dataTransfer.files[0]) handleFileSelect(e.dataTransfer.files[0]);
   });
 
-  function getFileIcon(mimeType) {
-    if (mimeType.includes('pdf'))   return '📕';
-    if (mimeType.includes('image')) return '🖼️';
-    if (mimeType.includes('excel') || mimeType.includes('spreadsheet')) return '📊';
-    if (mimeType.includes('word') || mimeType.includes('document'))     return '📝';
+  function getFileIcon(type) {
+    if (type.includes('pdf'))   return '📕';
+    if (type.includes('image')) return '🖼️';
+    if (type.includes('excel') || type.includes('spreadsheet')) return '📊';
+    if (type.includes('word')  || type.includes('document'))    return '📝';
     return '📄';
   }
-
-  function formatSize(bytes) {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / 1024 / 1024).toFixed(2) + ' MB';
+  function formatSize(b) {
+    if (b < 1024) return b + ' B';
+    if (b < 1024*1024) return (b/1024).toFixed(1) + ' KB';
+    return (b/1024/1024).toFixed(2) + ' MB';
   }
 
   function handleFileSelect(file) {
@@ -252,26 +206,22 @@
     document.getElementById('file-icon').textContent = getFileIcon(file.type);
     document.getElementById('file-name').textContent = file.name;
     document.getElementById('file-meta').textContent = `${file.type || '不明'} · ${formatSize(file.size)}`;
-
     const btn = document.getElementById('btn-upload');
     btn.disabled = false;
     btn.innerHTML = '📤 アップロード開始';
   }
 
   function resetFile() {
-    selectedFile = null;
-    fileInput.value = '';
+    selectedFile = null; fileInput.value = '';
     document.getElementById('file-info').classList.remove('show');
     const btn = document.getElementById('btn-upload');
     btn.disabled = true;
     btn.innerHTML = 'ファイルを選択してください';
   }
 
-  // ── アップロード処理 ────────────────────────────────────
   async function startUpload() {
     if (!selectedFile) return;
 
-    // UI初期化
     document.getElementById('btn-upload').disabled = true;
     document.getElementById('btn-upload').innerHTML = '<span class="spinner"></span> 処理中...';
     document.getElementById('steps').style.display = 'flex';
@@ -281,59 +231,45 @@
     setStep(2, 'pending', '待機中');
 
     try {
-      // ── STEP 1: Presigned URL を取得 ──────────────────
-      const metaRes = await fetch(UPLOAD_ENDPOINT, {
+      // ── STEP 1: 自サーバーのプロキシ経由でPresigned URLを取得 ──
+      const metaRes = await fetch('/proxy/upload', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': API_KEY
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          fileName:      selectedFile.name,
-          fileType:      selectedFile.type || 'application/octet-stream',
-          isSplit:       false,
-          schemaLocking: false
+          fileName: selectedFile.name,
+          fileType: selectedFile.type || 'application/octet-stream'
         })
       });
-
-      if (!metaRes.ok) {
-        const errText = await metaRes.text();
-        throw new Error(`Presigned URL取得失敗 (${metaRes.status}): ${errText}`);
+      const metaJson = await metaRes.json();
+      if (!metaRes.ok || !metaJson.success) {
+        throw new Error(metaJson.message || 'Presigned URL取得失敗');
       }
-
-      const meta = await metaRes.json();
+      const { presignedUploadURL, uploadId } = metaJson.data;
       setStep(1, 'done', '取得完了');
 
-      // ── STEP 2: Presigned URL にファイルをPUT ─────────
+      // ── STEP 2: Presigned URLに直接PUTでアップロード ──
       setStep(2, 'active', 'アップロード中...');
       document.getElementById('progress-wrap').classList.add('show');
-
-      await uploadWithProgress(meta.presignedUploadURL, selectedFile);
-
+      await uploadWithProgress(presignedUploadURL, selectedFile);
       setStep(2, 'done', '完了');
       setProgress(100, 'アップロード完了');
 
-      // ── 結果表示 ──────────────────────────────────────
+      // 結果表示
       const box = document.getElementById('result-box');
-      box.classList.add('show');
-      box.classList.remove('error-box');
+      box.classList.add('show'); box.classList.remove('error-box');
       document.getElementById('result-title').textContent = '✅ アップロード完了';
       document.getElementById('result-title').className = 'result-title';
-      document.getElementById('res-uploadId').textContent = meta.uploadId || '—';
+      document.getElementById('res-uploadId').textContent = uploadId || '—';
       document.getElementById('res-fileName').textContent = selectedFile.name;
       document.getElementById('res-fileType').textContent = selectedFile.type || 'application/octet-stream';
-
       document.getElementById('btn-upload').innerHTML = '✅ 完了';
 
     } catch (err) {
       console.error(err);
-      // エラー表示
-      const failStep = document.querySelector('.step.active');
-      if (failStep) {
-        failStep.classList.remove('active');
-        failStep.classList.add('error');
-        failStep.querySelector('.step-status').textContent = 'エラー';
-      }
+      document.querySelectorAll('.step.active').forEach(s => {
+        s.classList.replace('active', 'error');
+        s.querySelector('.step-status').textContent = 'エラー';
+      });
       const box = document.getElementById('result-box');
       box.classList.add('show', 'error-box');
       document.getElementById('result-title').textContent = '❌ エラーが発生しました';
@@ -341,7 +277,6 @@
       document.getElementById('res-uploadId').textContent = '—';
       document.getElementById('res-fileName').textContent = err.message;
       document.getElementById('res-fileType').textContent = '—';
-
       document.getElementById('btn-upload').disabled = false;
       document.getElementById('btn-upload').innerHTML = '↺ 再試行';
     }
@@ -352,41 +287,34 @@
       const xhr = new XMLHttpRequest();
       xhr.open('PUT', url);
       xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
-
       xhr.upload.addEventListener('progress', e => {
         if (e.lengthComputable) {
           const pct = Math.round(e.loaded / e.total * 100);
-          setProgress(pct, `アップロード中... ${formatSize(e.loaded)} / ${formatSize(e.total)}`);
+          setProgress(pct, `${formatSize(e.loaded)} / ${formatSize(e.total)}`);
         }
       });
-
       xhr.addEventListener('load', () => {
-        if (xhr.status >= 200 && xhr.status < 300) resolve();
-        else reject(new Error(`ファイルアップロード失敗 (${xhr.status})`));
+        xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`アップロード失敗 (${xhr.status})`));
       });
-      xhr.addEventListener('error', () => reject(new Error('ネットワークエラーが発生しました')));
+      xhr.addEventListener('error', () => reject(new Error('ネットワークエラー')));
       xhr.send(file);
     });
   }
 
-  function setStep(n, state, statusText) {
-    const el = document.getElementById('step' + n);
-    el.className = 'step ' + state;
-    document.getElementById('step' + n + '-status').textContent = statusText;
+  function setStep(n, state, text) {
+    document.getElementById('step'+n).className = 'step ' + state;
+    document.getElementById('step'+n+'-status').textContent = text;
   }
-
   function setProgress(pct, label) {
     document.getElementById('progress-bar').style.width = pct + '%';
     document.getElementById('progress-pct').textContent = pct + '%';
     document.getElementById('progress-label-text').textContent = label;
   }
-
   function resetAll() {
     resetFile();
     document.getElementById('steps').style.display = 'none';
     document.getElementById('result-box').classList.remove('show', 'error-box');
     document.getElementById('progress-wrap').classList.remove('show');
-    document.getElementById('btn-upload').innerHTML = 'ファイルを選択してください';
   }
 </script>
 </body>

@@ -121,6 +121,47 @@ app.get('/api/transform', (req, res) => {
   res.json({ success: true, data: result });
 });
 
+// ══════════════════════════════════════════════════
+//  FileAI アップロード プロキシ
+//  ブラウザのCORS制限を回避するためサーバー経由でAPIを叩く
+// ══════════════════════════════════════════════════
+
+const FILE_AI_API_KEY = 'sk-l2BMqsi5V46OYUebgH7BfRY3xwRR5qbvDPd0EG8qbo3ic9AD';
+const FILE_AI_UPLOAD  = 'https://api.orion.file.ai/prod/v1/files/upload';
+
+// STEP1: Presigned URL を取得してブラウザに返す
+app.post('/proxy/upload', async (req, res) => {
+  const { fileName, fileType } = req.body;
+  if (!fileName || !fileType) {
+    return res.status(400).json({ success: false, message: 'fileName と fileType は必須です' });
+  }
+  try {
+    const apiRes = await fetch(FILE_AI_UPLOAD, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': FILE_AI_API_KEY
+      },
+      body: JSON.stringify({
+        fileName,
+        fileType,
+        isSplit:       false,
+        schemaLocking: false
+      })
+    });
+    const data = await apiRes.json();
+    if (!apiRes.ok) {
+      console.error('[proxy/upload] FileAI error:', data);
+      return res.status(apiRes.status).json({ success: false, message: JSON.stringify(data) });
+    }
+    console.log(`[proxy/upload] presigned URL issued for: ${fileName}`);
+    res.json({ success: true, data });
+  } catch (e) {
+    console.error('[proxy/upload] fetch error:', e.message);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 // ポートバインド（Render対応）
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
