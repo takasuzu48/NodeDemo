@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Webhook V2 Viewer v1.2</title>
+<title>Webhook V2 Viewer v1.3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
@@ -354,6 +354,17 @@
                     ? fileIdsArr.map(id => `<span class="fileid-tag">${id}</span>`).join('')
                     : '<span style="color:var(--muted); font-size:13px;">fileIdsが見つかりませんでした</span>'
                   }
+                </div>
+              </div>
+
+              <!-- FileAI API リクエストURL -->
+              <div class="card-section">
+                <div class="card-section-title">
+                  <span class="dot-small" style="background:#f59e0b"></span>
+                  送信した API URL
+                </div>
+                <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#f59e0b; word-break:break-all; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:10px 14px;">
+                  ${log.fileApiUrl || '（URLなし）'}
                 </div>
               </div>
 

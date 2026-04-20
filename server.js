@@ -234,20 +234,29 @@ app.post('/webhookv2', async (req, res) => {
   // ── FileAI API へ GET リクエスト ──────────────
   let fileApiResult = null;
   let fileApiError  = null;
+  let fileApiUrl    = null;
   try {
-    const fileIdsParam = encodeURIComponent(JSON.stringify(fileIdsArr));
-    const apiUrl = `https://api.orion.file.ai/prod/v1/files?page=1&limit=100&sortBy=createdAt&sortOrder=ASC&fileIds=${fileIdsParam}`;
-    console.log('[webhookv2] calling FileAI API:', apiUrl);
+    // fileIdsをカンマ区切りで並べる形式で試す（例: fileIds=id1,id2）
+    const fileIdsParam = fileIdsArr.join(',');
+    fileApiUrl = `https://api.orion.file.ai/prod/v1/files?page=1&limit=100&sortBy=createdAt&sortOrder=ASC&fileIds=${fileIdsParam}`;
+    console.log('[webhookv2] calling FileAI API:', fileApiUrl);
+    console.log('[webhookv2] x-api-key: set');
 
-    const apiRes = await fetch(apiUrl, {
+    const apiRes = await fetch(fileApiUrl, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': 'sk-l2BMqsi5V46OYUebgH7BfRY3xwRR5qbvDPd0EG8qbo3ic9AD'
       }
     });
-    fileApiResult = await apiRes.json();
     console.log('[webhookv2] FileAI API response status:', apiRes.status);
+    const rawText = await apiRes.text();
+    console.log('[webhookv2] FileAI API raw response:', rawText.slice(0, 300));
+    try {
+      fileApiResult = JSON.parse(rawText);
+    } catch {
+      fileApiResult = { rawResponse: rawText };
+    }
   } catch (e) {
     fileApiError = e.message;
     console.error('[webhookv2] FileAI API error:', e.message);
@@ -257,6 +266,7 @@ app.post('/webhookv2', async (req, res) => {
   const record = {
     receivedAt:    new Date().toISOString(),
     webhookData:   body,
+    fileApiUrl:    fileApiUrl,
     fileApiResult: fileApiResult,
     fileApiError:  fileApiError,
   };
